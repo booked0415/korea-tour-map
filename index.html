@@ -1748,8 +1748,7 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-action" id="openDataPortalGuideBtn">🔗 data.go.kr 무료 키 발급 안내</button>
-        <button class="btn-action primary" id="fetchTourApiBtn">⚡ 공공데이터 최신 축제 동기화 실행</button>
+        <button class="btn-action primary" id="fetchTourApiBtn" style="width: 100%; justify-content: center;">⚡ 공공데이터 최신 축제 동기화 실행</button>
       </div>
     </div>
   </div>
@@ -2060,19 +2059,19 @@
 
     function loadData() {
       // Version 6 ensures newly verified dates overwrite previous cached values
-      const stored = localStorage.getItem('korea_tourism_database_v15');
+      const stored = localStorage.getItem('korea_tourism_database_v17');
       if (stored) {
         try { itemsData = JSON.parse(stored); }
         catch(e) { itemsData = [...DEFAULT_DATA]; }
       } else {
         itemsData = [...DEFAULT_DATA];
       }
-      bookmarks = JSON.parse(localStorage.getItem('korea_travel_bookmarks_v15') || '[]');
+      bookmarks = JSON.parse(localStorage.getItem('korea_travel_bookmarks_v17') || '[]');
       updateBookmarkBadges();
     }
 
     function saveData() {
-      localStorage.setItem('korea_tourism_database_v15', JSON.stringify(itemsData));
+      localStorage.setItem('korea_tourism_database_v17', JSON.stringify(itemsData));
     }
 
     // DOMESTIC BOUNDED MAP (KOREA ONLY)
@@ -2502,7 +2501,7 @@
       } else {
         bookmarks.push(id);
       }
-      localStorage.setItem('korea_travel_bookmarks_v15', JSON.stringify(bookmarks));
+      localStorage.setItem('korea_travel_bookmarks_v17', JSON.stringify(bookmarks));
       updateBookmarkBadges();
       renderCards();
       renderItinerary();
@@ -2859,7 +2858,7 @@
         clearItin.addEventListener('click', () => {
           if (confirm('선택한 여행 코스를 모두 비우시겠습니까?')) {
             bookmarks = [];
-            localStorage.removeItem('korea_travel_bookmarks_v15');
+            localStorage.removeItem('korea_travel_bookmarks_v17');
             updateBookmarkBadges();
             renderCards();
             renderItinerary();
@@ -2881,12 +2880,23 @@
         });
       }
 
+      // Auto-load saved TourAPI key from localStorage
+      const savedTourKey = localStorage.getItem('tourapi_service_key');
+      const keyInputEl = document.getElementById('apiServiceKeyInput');
+      if (savedTourKey && keyInputEl) {
+        keyInputEl.value = savedTourKey;
+      }
+
       const fetchApi = document.getElementById('fetchTourApiBtn');
       if (fetchApi) {
         fetchApi.addEventListener('click', async () => {
           const log = document.getElementById('apiLogOutput');
           const serviceKey = document.getElementById('apiServiceKeyInput').value.trim();
           const eventStartDate = document.getElementById('apiEventStartDate').value.trim() || '20261001';
+
+          if (serviceKey) {
+            localStorage.setItem('tourapi_service_key', serviceKey);
+          }
 
           log.textContent = `[연결 시작] TourAPI 4.0 searchFestival1 호출 중...\n날짜 기준: ${eventStartDate}`;
 
