@@ -190,7 +190,22 @@ def extract_festivals_with_gemini(api_key, articles, today_str):
                             clean_name = m_name.replace("models/", "")
                             discovered_models.append((ver, clean_name))
             if discovered_models:
-                print(f"[*] Discovered {len(discovered_models)} supported Gemini models via {ver} API!")
+                # Prioritize flash-lite and flash models over preview/experimental/tts
+                def model_priority(item):
+                    v, m = item
+                    score = 100
+                    if "lite" in m:
+                        score -= 50
+                    elif "flash" in m:
+                        score -= 40
+                    elif "pro" in m:
+                        score -= 20
+                    if "preview" in m or "tts" in m or "gemma" in m:
+                        score += 50
+                    return score
+
+                discovered_models.sort(key=model_priority)
+                print(f"[*] Discovered {len(discovered_models)} supported Gemini models via {ver} API! (Top choice: {discovered_models[0][1]})")
                 break
         except Exception:
             continue
@@ -212,8 +227,9 @@ def extract_festivals_with_gemini(api_key, articles, today_str):
                 "parts": [{"text": prompt}]
             }],
             "generationConfig": {
-                "temperature": 0.2,
-                "maxOutputTokens": 4096
+                "temperature": 0.1,
+                "maxOutputTokens": 8192,
+                "responseMimeType": "application/json"
             }
         }
         
