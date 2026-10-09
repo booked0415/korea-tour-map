@@ -285,6 +285,15 @@
       }
     }
 
+    
+    /* ADMIN BUTTON DEFAULT HIDDEN (Only visible to verified admin) */
+    #adminToggleBtn {
+      display: none !important;
+    }
+    #adminToggleBtn.unlocked {
+      display: inline-flex !important;
+    }
+
     /* RESIZABLE SIDEBAR */
     .sidebar {
       width: 480px;
@@ -1387,6 +1396,7 @@
       <button class="btn-admin" id="importJsonBtn">📂 JSON 복원 불러오기</button>
       <input type="file" id="jsonFileInput" accept=".json" style="display:none;" />
       <button class="btn-admin" id="resetDataBtn" style="background:#ef4444;">🔄 초기화</button>
+      <button class="btn-admin" id="lockAdminBtn" style="background:#475569;" title="관리자 권한 잠금 및 일반 방문자 모드로 복귀">🔒 관리자 모드 잠그기</button>
     </div>
   </div>
 
@@ -2030,9 +2040,150 @@
     // Multi-stage size check after load to handle mobile browser chrome/URL bar transitions
     [100, 300, 600, 1200, 2000].forEach(delay => setTimeout(invalidateMapSize, delay));
 
+    
+    // Admin Security & Secret Access Control
+    const ADMIN_PIN = "7777"; // 기본 관리자 PIN 비밀번호
+
+    function unlockAdminMode() {
+      localStorage.setItem('is_admin_unlocked', 'true');
+      
+      // Secret Admin Easter Egg: Click logo 5 times within 2 seconds
+      let logoClickCount = 0;
+      let logoClickTimer = null;
+      const brandLogo = document.getElementById('brandResetBtn');
+      if (brandLogo) {
+        brandLogo.addEventListener('click', (e) => {
+          logoClickCount++;
+          clearTimeout(logoClickTimer);
+          logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 1800);
+
+          if (logoClickCount >= 5) {
+            logoClickCount = 0;
+            const inputPin = prompt('🔐 관리자 모드 비밀번호(PIN)를 입력하세요 (기본: 7777):');
+            if (inputPin === ADMIN_PIN) {
+              alert('✅ 관리자 인증 완료! 상단에 [⚙️ 관리자 모드] 버튼이 활성화되었습니다.');
+              unlockAdminMode();
+              const adminBtn = document.getElementById('adminToggleBtn');
+              if (adminBtn && !isAdminMode) adminBtn.click();
+            } else if (inputPin !== null) {
+              alert('❌ 관리자 비밀번호가 일치하지 않습니다.');
+            }
+          }
+        });
+      }
+
+      // Lock Admin Mode button
+      const lockAdmin = document.getElementById('lockAdminBtn');
+      if (lockAdmin) {
+        lockAdmin.addEventListener('click', () => {
+          lockAdminMode();
+        });
+      }
+
+      const adminBtn = document.getElementById('adminToggleBtn');
+      if (adminBtn) adminBtn.classList.add('unlocked');
+    }
+
+    function lockAdminMode() {
+      localStorage.removeItem('is_admin_unlocked');
+      isAdminMode = false;
+      
+      // Secret Admin Easter Egg: Click logo 5 times within 2 seconds
+      let logoClickCount = 0;
+      let logoClickTimer = null;
+      const brandLogo = document.getElementById('brandResetBtn');
+      if (brandLogo) {
+        brandLogo.addEventListener('click', (e) => {
+          logoClickCount++;
+          clearTimeout(logoClickTimer);
+          logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 1800);
+
+          if (logoClickCount >= 5) {
+            logoClickCount = 0;
+            const inputPin = prompt('🔐 관리자 모드 비밀번호(PIN)를 입력하세요 (기본: 7777):');
+            if (inputPin === ADMIN_PIN) {
+              alert('✅ 관리자 인증 완료! 상단에 [⚙️ 관리자 모드] 버튼이 활성화되었습니다.');
+              unlockAdminMode();
+              const adminBtn = document.getElementById('adminToggleBtn');
+              if (adminBtn && !isAdminMode) adminBtn.click();
+            } else if (inputPin !== null) {
+              alert('❌ 관리자 비밀번호가 일치하지 않습니다.');
+            }
+          }
+        });
+      }
+
+      // Lock Admin Mode button
+      const lockAdmin = document.getElementById('lockAdminBtn');
+      if (lockAdmin) {
+        lockAdmin.addEventListener('click', () => {
+          lockAdminMode();
+        });
+      }
+
+      const adminBtn = document.getElementById('adminToggleBtn');
+      if (adminBtn) {
+        adminBtn.classList.remove('unlocked', 'active');
+        adminBtn.innerHTML = '<span>⚙️ 관리자 모드</span>';
+      }
+      const bar = document.getElementById('adminBar');
+      if (bar) bar.classList.remove('open');
+      renderCards();
+      alert('🔒 관리자 모드가 안전하게 잠겼습니다.');
+    }
+
+    function checkAdminAccess() {
+      // 1. Check Secret URL Parameter (e.g. ?admin=7777 or ?admin=true)
+      const urlParams = new URLSearchParams(window.location.search);
+      const adminParam = urlParams.get('admin');
+      if (adminParam === ADMIN_PIN || adminParam === 'true') {
+        unlockAdminMode();
+        // Automatically activate admin mode on secret URL visit
+        
+      // Secret Admin Easter Egg: Click logo 5 times within 2 seconds
+      let logoClickCount = 0;
+      let logoClickTimer = null;
+      const brandLogo = document.getElementById('brandResetBtn');
+      if (brandLogo) {
+        brandLogo.addEventListener('click', (e) => {
+          logoClickCount++;
+          clearTimeout(logoClickTimer);
+          logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 1800);
+
+          if (logoClickCount >= 5) {
+            logoClickCount = 0;
+            const inputPin = prompt('🔐 관리자 모드 비밀번호(PIN)를 입력하세요 (기본: 7777):');
+            if (inputPin === ADMIN_PIN) {
+              alert('✅ 관리자 인증 완료! 상단에 [⚙️ 관리자 모드] 버튼이 활성화되었습니다.');
+              unlockAdminMode();
+              const adminBtn = document.getElementById('adminToggleBtn');
+              if (adminBtn && !isAdminMode) adminBtn.click();
+            } else if (inputPin !== null) {
+              alert('❌ 관리자 비밀번호가 일치하지 않습니다.');
+            }
+          }
+        });
+      }
+
+      // Lock Admin Mode button
+      const lockAdmin = document.getElementById('lockAdminBtn');
+      if (lockAdmin) {
+        lockAdmin.addEventListener('click', () => {
+          lockAdminMode();
+        });
+      }
+
+      const adminBtn = document.getElementById('adminToggleBtn');
+        if (adminBtn && !isAdminMode) adminBtn.click();
+      } else if (localStorage.getItem('is_admin_unlocked') === 'true') {
+        unlockAdminMode();
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       try {
         loadData();
+        checkAdminAccess();
         setupTheme();
         setupEventListeners();
         setupSidebarResizer();
@@ -2057,19 +2208,19 @@
 
     function loadData() {
       // Version 6 ensures newly verified dates overwrite previous cached values
-      const stored = localStorage.getItem('korea_tourism_database_v17');
+      const stored = localStorage.getItem('korea_tourism_database_v18');
       if (stored) {
         try { itemsData = JSON.parse(stored); }
         catch(e) { itemsData = [...DEFAULT_DATA]; }
       } else {
         itemsData = [...DEFAULT_DATA];
       }
-      bookmarks = JSON.parse(localStorage.getItem('korea_travel_bookmarks_v17') || '[]');
+      bookmarks = JSON.parse(localStorage.getItem('korea_travel_bookmarks_v18') || '[]');
       updateBookmarkBadges();
     }
 
     function saveData() {
-      localStorage.setItem('korea_tourism_database_v17', JSON.stringify(itemsData));
+      localStorage.setItem('korea_tourism_database_v18', JSON.stringify(itemsData));
     }
 
     // DOMESTIC BOUNDED MAP (KOREA ONLY)
@@ -2499,7 +2650,7 @@
       } else {
         bookmarks.push(id);
       }
-      localStorage.setItem('korea_travel_bookmarks_v17', JSON.stringify(bookmarks));
+      localStorage.setItem('korea_travel_bookmarks_v18', JSON.stringify(bookmarks));
       updateBookmarkBadges();
       renderCards();
       renderItinerary();
@@ -2856,7 +3007,7 @@
         clearItin.addEventListener('click', () => {
           if (confirm('선택한 여행 코스를 모두 비우시겠습니까?')) {
             bookmarks = [];
-            localStorage.removeItem('korea_travel_bookmarks_v17');
+            localStorage.removeItem('korea_travel_bookmarks_v18');
             updateBookmarkBadges();
             renderCards();
             renderItinerary();
@@ -2919,6 +3070,40 @@
       }
 
       // Admin Mode
+      
+      // Secret Admin Easter Egg: Click logo 5 times within 2 seconds
+      let logoClickCount = 0;
+      let logoClickTimer = null;
+      const brandLogo = document.getElementById('brandResetBtn');
+      if (brandLogo) {
+        brandLogo.addEventListener('click', (e) => {
+          logoClickCount++;
+          clearTimeout(logoClickTimer);
+          logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 1800);
+
+          if (logoClickCount >= 5) {
+            logoClickCount = 0;
+            const inputPin = prompt('🔐 관리자 모드 비밀번호(PIN)를 입력하세요 (기본: 7777):');
+            if (inputPin === ADMIN_PIN) {
+              alert('✅ 관리자 인증 완료! 상단에 [⚙️ 관리자 모드] 버튼이 활성화되었습니다.');
+              unlockAdminMode();
+              const adminBtn = document.getElementById('adminToggleBtn');
+              if (adminBtn && !isAdminMode) adminBtn.click();
+            } else if (inputPin !== null) {
+              alert('❌ 관리자 비밀번호가 일치하지 않습니다.');
+            }
+          }
+        });
+      }
+
+      // Lock Admin Mode button
+      const lockAdmin = document.getElementById('lockAdminBtn');
+      if (lockAdmin) {
+        lockAdmin.addEventListener('click', () => {
+          lockAdminMode();
+        });
+      }
+
       const adminBtn = document.getElementById('adminToggleBtn');
       if (adminBtn) {
         adminBtn.addEventListener('click', () => {
