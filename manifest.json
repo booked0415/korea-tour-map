@@ -1,0 +1,24 @@
+{
+  "name": "대한민국 관광·축제 인터랙티브 지도",
+  "short_name": "대한민국 축제지도",
+  "description": "전국 17개 시도 대표 축제 및 주요 관광지 인터랙티브 지도 웹앱",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

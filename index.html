@@ -1,0 +1,3256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- PWA & Mobile Web App Meta Tags -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="대한민국 축제지도" />
+  <meta name="application-name" content="대한민국 축제지도" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="msapplication-TileColor" content="#2563eb" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+
+  <title>대한민국 관광·축제 지도 | 네이버 & 구글 지도 스타일</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script>
+    if (typeof L === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"><\/script>');
+    }
+  </script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --festival-color: #ec4899;
+      --festival-light: #fdf2f8;
+      --nature-color: #059669;
+      --nature-light: #ecfdf5;
+      --history-color: #d97706;
+      --history-light: #fffbeb;
+      --food-color: #dc2626;
+      --food-light: #fef2f2;
+      
+      --bg-main: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-sidebar: #ffffff;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-sub: #334155;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.05);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --header-height: 64px;
+    }
+
+    [data-theme="dark"] {
+      --bg-main: #090d16;
+      --bg-card: #131b2e;
+      --bg-sidebar: #0f172a;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sub: #cbd5e1;
+      --primary-light: rgba(37, 99, 235, 0.16);
+      --festival-light: rgba(236, 72, 153, 0.16);
+      --nature-light: rgba(5, 150, 105, 0.16);
+      --history-light: rgba(217, 119, 6, 0.16);
+      --food-light: rgba(220, 38, 38, 0.16);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+      --shadow-md: 0 4px 8px rgba(0,0,0,0.5);
+      --shadow-lg: 0 12px 24px rgba(0,0,0,0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      height: var(--header-height);
+      background-color: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 1000;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 20px;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+    }
+
+    .brand-text h1 {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      border: 1px solid #bae6fd;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-nav {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-nav:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-nav.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .btn-itinerary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .btn-itinerary:hover { background: var(--primary-hover); }
+
+    .badge-count {
+      background: #fff;
+      color: var(--primary);
+      border-radius: 9999px;
+      padding: 1px 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .admin-bar {
+      display: none;
+      background: linear-gradient(90deg, #1e293b, #0f172a);
+      color: #f8fafc;
+      padding: 8px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      z-index: 999;
+    }
+    .admin-bar.open { display: flex; }
+
+    .btn-admin {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-admin:hover { background: #2563eb; border-color: #2563eb; }
+
+    .app-body {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - var(--header-height));
+      position: relative;
+      overflow: hidden;
+    }
+
+    
+    /* MOBILE TAB BAR DESKTOP HIDING (Fix unwanted flex column bug) */
+    .mobile-tab-bar {
+      display: none !important;
+    }
+
+    /* SIDEBAR TOP TITLE ROW (Placed directly above search box) */
+    .sidebar-top-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 0 10px 0;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 12px;
+    }
+    .sidebar-title-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-title-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+    .sidebar-title-text {
+      font-size: 15.5px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.3px;
+    }
+    .sidebar-title-count-badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid rgba(37, 99, 235, 0.25);
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    .btn-close-sidebar {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 8px;
+      line-height: 1;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+    .btn-close-sidebar:hover {
+      background: var(--bg-main);
+      color: var(--text-main);
+    }
+    @media (max-width: 900px) {
+      .btn-close-sidebar {
+        display: block !important;
+      }
+    }
+
+    /* RESIZABLE SIDEBAR */
+    .sidebar {
+      width: 480px;
+      min-width: 340px;
+      max-width: 800px;
+      background: var(--bg-sidebar);
+      display: flex;
+      flex-direction: column;
+      z-index: 900;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    /* DRAGGABLE RESIZER BAR */
+    .sidebar-resizer {
+      width: 8px;
+      background: var(--border-color);
+      cursor: col-resize;
+      position: relative;
+      z-index: 950;
+      transition: background 0.15s;
+      user-select: none;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sidebar-resizer::after {
+      content: "";
+      width: 2px;
+      height: 24px;
+      background: var(--text-muted);
+      border-radius: 2px;
+      opacity: 0.6;
+    }
+    .sidebar-resizer:hover, .sidebar-resizer.resizing {
+      background: var(--primary);
+    }
+    .sidebar-resizer:hover::after, .sidebar-resizer.resizing::after {
+      background: #ffffff;
+      opacity: 1;
+    }
+
+    .filter-header {
+      padding: 14px 18px 10px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      max-height: 48vh;
+    }
+
+    .search-box { position: relative; }
+    .search-input {
+      width: 100%;
+      height: 40px;
+      padding: 0 36px 0 36px;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 13.5px;
+      color: var(--text-main);
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      font-size: 14px;
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 15px;
+      display: none;
+    }
+
+    .date-filter-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-main);
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      font-size: 12px;
+    }
+
+    .date-input {
+      background: none;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 11px;
+      color: var(--text-main);
+    }
+
+    .chip-group-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* CHIP SCROLL WITH CLEAN WRAPPING (NEVER CUTS OFF) */
+    .chip-scroll {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding-bottom: 3px;
+    }
+
+    .chip {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      color: var(--text-sub);
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 16px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .chip:hover { border-color: var(--primary); color: var(--primary); }
+    .chip.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; }
+
+    .stats-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 18px;
+      background: var(--bg-main);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .stats-count strong { color: var(--primary); font-weight: 700; }
+
+    .reset-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .reset-btn:hover { text-decoration: underline; }
+
+    .card-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+    .item-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--primary); }
+    .item-card.selected { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35); background: var(--primary-light); }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .card-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card-badges {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .badge-status-ongoing {
+      background: #fef2f2;
+      color: #ef4444;
+      border: 1px solid #fecaca;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-status-ongoing::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: #ef4444;
+      border-radius: 50%;
+      animation: pulseDot 1.4s infinite;
+    }
+    @keyframes pulseDot {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .badge-status-upcoming { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+    .badge-status-always { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+    .badge-status-closed { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+
+    .badge-festival { background: var(--festival-light); color: var(--festival-color); }
+    .badge-attraction { background: var(--primary-light); color: var(--primary); }
+    .badge-region { background: var(--bg-main); color: var(--text-sub); border: 1px solid var(--border-color); }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.35;
+    }
+
+    .btn-bookmark {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 17px;
+      padding: 4px;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+    .btn-bookmark.bookmarked { color: #e11d48; }
+
+    .card-summary {
+      font-size: 12.5px;
+      color: var(--text-sub);
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .card-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card-period-highlight {
+      font-weight: 700;
+      color: #0f172a;
+    }
+    [data-theme="dark"] .card-period-highlight { color: #f8fafc; }
+
+    .card-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+    .tag-item {
+      font-size: 10px;
+      color: var(--text-muted);
+      background: var(--bg-main);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .card-admin-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    /* REAL MAP VIEWPORT */
+    .map-wrapper {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    #realMap {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    .map-layer-selector {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 800;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 4px;
+      display: flex;
+      gap: 4px;
+      box-shadow: var(--shadow-md);
+    }
+
+    [data-theme="dark"] .map-layer-selector { background: rgba(19, 27, 46, 0.94); }
+
+    .layer-btn {
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .layer-btn:hover { background: var(--bg-main); color: var(--primary); }
+    .layer-btn.active { background: var(--primary); color: #fff; }
+
+    .map-floating-tools {
+      position: absolute;
+      top: 68px;
+      right: 16px;
+      z-index: 800;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .tool-btn {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    [data-theme="dark"] .tool-btn { background: rgba(19, 27, 46, 0.94); }
+    .tool-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .tool-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .quick-region-bar {
+      position: absolute;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      border-radius: 30px;
+      padding: 6px 14px;
+      display: flex;
+      gap: 5px;
+      z-index: 800;
+      box-shadow: var(--shadow-lg);
+      max-width: 90%;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .quick-region-bar::-webkit-scrollbar { display: none; }
+    [data-theme="dark"] .quick-region-bar { background: rgba(19, 27, 46, 0.94); }
+
+    .region-pill {
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 11px;
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .region-pill:hover, .region-pill.active { background: var(--primary); color: #fff; }
+
+    .naver-pin-marker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .naver-pin-marker:hover {
+      transform: translateY(-4px) scale(1.15);
+      z-index: 9999 !important;
+    }
+
+    .naver-pin-head {
+      width: 32px;
+      height: 32px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      border: 2px solid #ffffff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .naver-pin-icon { transform: rotate(45deg); font-size: 14px; }
+
+    .naver-pin-beacon {
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid #ef4444;
+      animation: beaconPulse 1.6s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes beaconPulse {
+      0% { transform: scale(0.6); opacity: 1; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+
+    
+    /* CUSTOM STYLING FOR LEAFLET ZOOM CONTROLS (+ / -) */
+    .leaflet-control-zoom {
+      border: 1px solid var(--border-color) !important;
+      border-radius: 10px !important;
+      box-shadow: var(--shadow-md) !important;
+      overflow: hidden !important;
+    }
+    .leaflet-control-zoom a {
+      background-color: rgba(255, 255, 255, 0.95) !important;
+      color: var(--text-main) !important;
+      width: 36px !important;
+      height: 36px !important;
+      line-height: 36px !important;
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      transition: background 0.15s, color 0.15s !important;
+    }
+    .leaflet-control-zoom a:hover {
+      background-color: #f1f5f9 !important;
+      color: var(--primary) !important;
+    }
+    [data-theme="dark"] .leaflet-control-zoom a {
+      background-color: var(--bg-card) !important;
+      color: var(--text-main) !important;
+      border-bottom-color: var(--border-color) !important;
+    }
+    [data-theme="dark"] .leaflet-control-zoom a:hover {
+      background-color: #1e293b !important;
+      color: #60a5fa !important;
+    }
+
+    /* POSITION ZOOM CONTROLS AT BOTTOM RIGHT ABOVE REGION BAR */
+    .leaflet-bottom.leaflet-right .leaflet-control-zoom {
+      margin-bottom: 30px !important;
+      margin-right: 16px !important;
+    }
+
+    @media (max-width: 900px) {
+      .leaflet-bottom.leaflet-right .leaflet-control-zoom {
+        margin-bottom: 58px !important;
+        margin-right: 12px !important;
+      }
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 12px !important;
+      padding: 2px !important;
+      box-shadow: var(--shadow-lg) !important;
+    }
+
+    .popup-card { padding: 10px 12px; max-width: 270px; }
+    .popup-title { font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+    .popup-meta { font-size: 11.5px; color: #475569; line-height: 1.4; margin-bottom: 8px; }
+    .popup-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    #particleCanvas {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 750;
+      display: none;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      animation: modalSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalSlide {
+      from { transform: translateY(20px) scale(0.96); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 18px 24px 14px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .modal-title { font-size: 19px; font-weight: 800; color: var(--text-main); }
+    .modal-close-btn {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-muted); font-size: 16px;
+    }
+    .modal-close-btn:hover { background: #fee2e2; color: #ef4444; }
+
+    .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-section-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .modal-summary-box {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      font-size: 13.5px;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .info-item {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 9px 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .info-item .label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .info-item .value { font-size: 13px; font-weight: 700; color: var(--text-main); }
+
+    .tip-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 12.5px;
+      color: #1e40af;
+      line-height: 1.5;
+      display: flex;
+      gap: 8px;
+    }
+    [data-theme="dark"] .tip-box {
+      background: rgba(30, 64, 175, 0.2);
+      border-color: rgba(30, 64, 175, 0.4);
+      color: #93c5fd;
+    }
+
+    .modal-footer {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      border: 1px solid var(--border-color);
+      background: var(--bg-main);
+      color: var(--text-main);
+    }
+    .btn-action.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .btn-action.primary:hover { background: var(--primary-hover); }
+
+    .drawer-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(2px);
+      z-index: 1500;
+      display: none;
+    }
+    .drawer-overlay.open { display: block; }
+
+    .itinerary-drawer {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 420px;
+      max-width: 90vw;
+      background: var(--bg-sidebar);
+      border-left: 1px solid var(--border-color);
+      z-index: 1600;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: -4px 0 24px rgba(0,0,0,0.18);
+    }
+    .itinerary-drawer.open { transform: translateX(0); }
+
+    .drawer-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .itinerary-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .itinerary-index {
+      width: 24px; height: 24px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+    .form-group label { font-size: 12px; font-weight: 700; color: var(--text-main); }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-main);
+      outline: none;
+    }
+    .form-textarea { min-height: 70px; resize: vertical; }
+
+    /* UNIVERSAL BOX SIZING & VIEWPORT SAFETY */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      max-width: 100vw;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      height: 100%;
+      position: relative;
+    }
+
+    /* DESKTOP / MOBILE VISIBILITY HELPERS */
+    .mobile-menu-btn { display: none !important; }
+    .layer-btn-short { display: none !important; }
+    .mobile-sidebar-close-header { display: none !important; }
+
+    /* SIDEBAR BACKDROP FOR MOBILE */
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(2px);
+      z-index: 2400;
+    }
+    .sidebar-backdrop.active {
+      display: block;
+    }
+
+    /* MOBILE RESPONSIVE OPTIMIZATION (PHONE & TABLET <= 900px) */
+    @media (max-width: 900px) {
+      :root {
+        --header-height: 54px;
+      }
+
+      /* Header bar */
+      header {
+        padding: 0 10px !important;
+        height: var(--header-height) !important;
+        overflow: hidden !important;
+        max-width: 100vw !important;
+      }
+      .brand {
+        gap: 8px !important;
+        min-width: 0 !important;
+        flex-shrink: 1 !important;
+      }
+      .brand-icon {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 16px !important;
+        border-radius: 8px !important;
+        flex-shrink: 0 !important;
+      }
+      .brand-text h1 {
+        font-size: 13.5px !important;
+        font-weight: 800 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+      .brand-badge {
+        display: none !important;
+      }
+      .desktop-only-btn {
+        display: none !important;
+      }
+      .mobile-menu-btn {
+        display: flex !important;
+      }
+      .nav-actions {
+        gap: 5px !important;
+        flex-shrink: 0 !important;
+      }
+      .btn-nav {
+        padding: 6px 9px !important;
+        font-size: 12px !important;
+      }
+
+      /* Admin Bar on mobile */
+      .admin-bar {
+        padding: 6px 10px !important;
+        font-size: 11px !important;
+        gap: 6px !important;
+      }
+      .admin-actions {
+        gap: 4px !important;
+        flex-wrap: wrap !important;
+      }
+      .btn-admin {
+        padding: 4px 8px !important;
+        font-size: 10.5px !important;
+      }
+
+      /* App Body & Map Full-Screen Viewport */
+      .app-body {
+        width: 100% !important;
+        max-width: 100vw !important;
+        height: calc(100vh - var(--header-height)) !important;
+        overflow: hidden !important;
+        position: relative !important;
+      }
+      .map-wrapper {
+        width: 100% !important;
+        height: 100% !important;
+        flex: 1 1 100% !important;
+        position: relative !important;
+      }
+      #realMap {
+        width: 100% !important;
+        height: 100% !important;
+        position: absolute !important;
+        top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+      }
+
+      /* Sidebar as full mobile drawer */
+      .sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        width: 88% !important;
+        max-width: 380px !important;
+        height: 100% !important;
+        z-index: 2500 !important;
+        transform: translateX(-100%) !important;
+        transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.35) !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .sidebar.open {
+        transform: translateX(0) !important;
+      }
+      .sidebar-resizer {
+        display: none !important;
+      }
+      .mobile-sidebar-close-header {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        background: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      /* Floating Controls on Map */
+      .mobile-tab-bar {
+        display: block !important;
+        position: absolute !important;
+        top: 8px !important;
+        left: 8px !important;
+        z-index: 850 !important;
+      }
+      #mobileSidebarToggle {
+        background: #ffffff !important;
+        color: var(--primary) !important;
+        border: 1px solid var(--primary) !important;
+        box-shadow: var(--shadow-md) !important;
+        padding: 6px 12px !important;
+        border-radius: 20px !important;
+        font-weight: 700 !important;
+        font-size: 11.5px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+      }
+      [data-theme="dark"] #mobileSidebarToggle {
+        background: var(--bg-card) !important;
+        color: #60a5fa !important;
+        border-color: #3b82f6 !important;
+      }
+
+      /* Map Layer Selector */
+      .map-layer-selector {
+        top: 8px !important;
+        right: 8px !important;
+        padding: 3px !important;
+        gap: 2px !important;
+        max-width: calc(100% - 135px) !important;
+        border-radius: 8px !important;
+      }
+      .layer-btn {
+        padding: 4px 6px !important;
+        font-size: 10.5px !important;
+        gap: 2px !important;
+      }
+      .layer-btn-full {
+        display: none !important;
+      }
+      .layer-btn-short {
+        display: inline !important;
+      }
+
+      /* Floating GPS / Reset tools */
+      .map-floating-tools {
+        top: 46px !important;
+        right: 8px !important;
+        gap: 4px !important;
+      }
+      .tool-btn {
+        padding: 5px 8px !important;
+        font-size: 10.5px !important;
+        border-radius: 8px !important;
+      }
+
+      /* Quick region bar */
+      .quick-region-bar {
+        bottom: 8px !important;
+        left: 8px !important;
+        right: 8px !important;
+        transform: none !important;
+        width: calc(100% - 16px) !important;
+        max-width: none !important;
+        padding: 4px 8px !important;
+        gap: 4px !important;
+        border-radius: 20px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+      .region-pill {
+        font-size: 10.5px !important;
+        padding: 3px 7px !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Detail Modals on mobile */
+      .modal-overlay {
+        padding: 10px !important;
+      }
+      .modal-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 92vh !important;
+        border-radius: 12px !important;
+      }
+      .modal-header {
+        padding: 12px 14px !important;
+      }
+      .modal-title {
+        font-size: 15px !important;
+      }
+      .modal-body {
+        padding: 12px 14px !important;
+        gap: 10px !important;
+      }
+      .info-grid {
+        grid-template-columns: 1fr !important;
+        gap: 6px !important;
+      }
+      .info-item {
+        grid-column: span 1 !important;
+      }
+      .modal-footer {
+        padding: 10px 14px !important;
+        grid-template-columns: 1fr !important;
+        gap: 6px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header>
+    <div class="brand" id="brandResetBtn" title="전국 지도 시점으로 복원">
+      <div class="brand-icon">🗺️</div>
+      <div class="brand-text">
+        <h1>대한민국 관광·축제 지도 <span class="brand-badge">네이버·구글 맵 스타일</span></h1>
+      </div>
+    </div>
+    
+    <div class="nav-actions">
+      <!-- 데스크톱 전용 버튼들 (모바일에서는 ☰ 설정 메뉴에 통합) -->
+      <button class="btn-nav desktop-only-btn" id="particleToggleBtn" title="계절 효과 애니메이션 (클릭 시 켜기/끄기)">
+        <span id="particleIcon">🍁</span> <span id="particleStatusText">계절 효과 (OFF)</span>
+      </button>
+
+      <button class="btn-nav desktop-only-btn" id="openApiModalBtn" title="한국관광공사 TourAPI 공공데이터 연동">
+        <span>📡 공공데이터 연동</span>
+      </button>
+
+      <button class="btn-nav desktop-only-btn" id="adminToggleBtn" title="관리자 등록/편집 모드">
+        <span>⚙️ 관리자 모드</span>
+      </button>
+
+            <!-- PWA 앱 설치 버튼 -->
+      <button class="btn-nav" id="pwaInstallBtn" title="스마트폰 / PC 앱으로 설치 및 웹 배포 안내" style="background:#eff6ff; color:#2563eb; border-color:#bfdbfe; font-weight:700;">
+        <span>📲 앱 설치</span>
+      </button>
+
+      <!-- 테마 토글 -->
+      <button class="btn-nav" id="themeToggleBtn" title="다크/라이트 모드">
+        <span id="themeIcon">🌙</span>
+      </button>
+
+      <!-- 내 여행 코스 플래너 -->
+      <button class="btn-nav btn-itinerary" id="openItineraryBtn">
+        <span>📍 내 코스</span>
+        <span class="badge-count" id="itineraryBadgeCount">0</span>
+      </button>
+
+      <!-- 모바일 전용 메뉴 버튼 -->
+      <button class="btn-nav mobile-menu-btn" id="mobileMenuToggleBtn" title="설정 및 부가 메뉴 열기">
+        <span>⚙️ 메뉴</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 6단계: ADMIN BAR -->
+  <div class="admin-bar" id="adminBar">
+    <div>
+      <span>🔧 관리자 모드 활성화됨 — 신규 축제 등록, 수정, 삭제 및 JSON 데이터 백업/복원이 가능합니다.</span>
+    </div>
+    <div class="admin-actions">
+      <button class="btn-admin" id="openAddModalBtn">➕ 새 축제/명소 등록</button>
+      <button class="btn-admin" id="exportJsonBtn">💾 JSON 백업 다운로드</button>
+      <button class="btn-admin" id="importJsonBtn">📂 JSON 복원 불러오기</button>
+      <input type="file" id="jsonFileInput" accept=".json" style="display:none;" />
+      <button class="btn-admin" id="resetDataBtn" style="background:#ef4444;">🔄 초기화</button>
+    </div>
+  </div>
+
+  <!-- MAIN APP BODY -->
+  <div class="app-body">
+    
+    
+    <!-- MOBILE SIDEBAR BACKDROP -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+
+    <!-- RESIZABLE SIDEBAR -->
+    <aside class="sidebar" id="sidebarPanel">
+      
+      
+      <div class="filter-header">
+        <!-- SIDEBAR TOP TITLE BAR (키워드 검색칸 바로 위 깔끔한 배치) -->
+        <div class="sidebar-top-title-row">
+          <div class="sidebar-title-left">
+            <span class="sidebar-title-icon">📋</span>
+            <span class="sidebar-title-text">축제·명소 목록</span>
+            <span class="sidebar-title-count-badge" id="sidebarHeaderCount">0개</span>
+          </div>
+          <button class="btn-close-sidebar" id="closeSidebarBtn" title="목록 닫기">✕</button>
+        </div>
+        
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" class="search-input" placeholder="축제명, 관광지, 지역, 해시태그 검색..." />
+          <button id="clearSearchBtn" class="clear-btn">✕</button>
+        </div>
+
+        <div class="date-filter-row">
+          <span>📅 기간:</span>
+          <input type="date" id="startDateInput" class="date-input" title="시작일" />
+          <span>~</span>
+          <input type="date" id="endDateInput" class="date-input" title="종료일" />
+          <button class="reset-btn" id="clearDateBtn" style="font-size:11px;">초기화</button>
+        </div>
+
+        <div>
+          <div class="chip-group-label">행사 일정 빠른 선택 (2026.10.09 기준)</div>
+          <div class="chip-scroll" id="timingFilter">
+            <button class="chip active" data-timing="all">전체 일정</button>
+            <button class="chip" data-timing="ongoing" style="border-color:#fca5a5;">🔴 오늘 진행중 (LIVE)</button>
+            <button class="chip" data-timing="upcoming" style="border-color:#86efac;">🟢 개최 예정</button>
+            <button class="chip" data-timing="always" style="border-color:#93c5fd;">🔵 상시 운영</button>
+            <button class="chip" data-timing="closed" style="border-color:#cbd5e1; color:#64748b;">⚪ 지난 축제 (종료)</button>
+            <button class="chip" data-timing="month-10">10월 축제</button>
+            <button class="chip" data-timing="month-11">11월 축제</button>
+            <button class="chip" data-timing="month-01">1월 겨울축제</button>
+            <button class="chip" data-timing="month-03">3~5월 봄축제</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="chip-group-label">📍 지역 선택 (전국 8도·광역)</div>
+          <div class="chip-scroll" id="provinceFilter" style="flex-wrap: wrap; gap: 6px;">
+            <button class="chip active" data-province="all">전국 전체</button>
+            <button class="chip" data-province="서울">서울</button>
+            <button class="chip" data-province="경기">경기도</button>
+            <button class="chip" data-province="인천">인천</button>
+            <button class="chip" data-province="강원">강원도</button>
+            <button class="chip" data-province="충청">충청도</button>
+            <button class="chip" data-province="전라">전라도</button>
+            <button class="chip" data-province="경상">경상도</button>
+            <button class="chip" data-province="제주">제주도</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="chip-group-label">카테고리 / 테마</div>
+          <div class="chip-scroll" id="categoryFilter">
+            <button class="chip active" data-category="all">전체 테마</button>
+            <button class="chip" data-category="문화/역사">🏯 문화/역사</button>
+            <button class="chip" data-category="자연/힐링">🌿 자연/힐링</button>
+            <button class="chip" data-category="축제/행사">🎆 축제/행사</button>
+            <button class="chip" data-category="미식/체험">🍜 미식/체험</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="stats-bar">
+        <div class="stats-count">
+          현재 <strong id="visibleCount">0</strong>개 행사/명소 표시 중
+        </div>
+        <button class="reset-btn" id="resetAllFiltersBtn">
+          🔄 전체 필터 초기화
+        </button>
+      </div>
+
+      <div class="card-list" id="cardList"></div>
+    </aside>
+
+    <!-- DRAGGABLE RESIZER BAR -->
+    <div class="sidebar-resizer" id="sidebarResizer" title="좌우로 드래그하여 패널 너비를 조절할 수 있습니다"></div>
+
+        <!-- REAL MAP VIEWPORT (DOMESTIC RESTRICTED TO KOREA) -->
+    <main class="map-wrapper" id="mapWrapper">
+      <div class="mobile-tab-bar">
+        <button class="btn-nav" id="mobileSidebarToggle">
+          <span>📋 축제 목록</span>
+          <span class="badge-count" id="mobileCountBadge" style="background:var(--primary); color:#fff; padding:1px 6px; border-radius:10px; font-size:10.5px; font-weight:700;">0</span>
+        </button>
+      </div>
+      <div id="realMap"></div>
+      <canvas id="particleCanvas"></canvas>
+
+      <div class="map-layer-selector">
+        <button class="layer-btn active" data-layer="street" title="일반 도로 지도">
+          <span>🗺️</span>
+          <span class="layer-btn-full">일반 지도 (Google/도로)</span>
+          <span class="layer-btn-short">일반</span>
+        </button>
+        <button class="layer-btn" data-layer="satellite" title="고화질 위성 지도">
+          <span>🛰️</span>
+          <span class="layer-btn-full">위성 지도 (위성/지명)</span>
+          <span class="layer-btn-short">위성</span>
+        </button>
+        <button class="layer-btn" data-layer="topo" title="등고 지형도">
+          <span>🏔️</span>
+          <span class="layer-btn-full">지형도 (Google Terrain)</span>
+          <span class="layer-btn-short">지형</span>
+        </button>
+        <button class="layer-btn" data-layer="dark" title="야간 다크 지도">
+          <span>🌙</span>
+          <span class="layer-btn-full">야간 모드 (Dark)</span>
+          <span class="layer-btn-short">야간</span>
+        </button>
+      </div>
+
+      <div class="map-floating-tools">
+        <button class="tool-btn" id="locateMeBtn" title="현재 내 GPS 위치로 이동">
+          🎯 내 위치
+        </button>
+        <button class="tool-btn" id="resetCenterBtn" title="전국 지도 중심으로 복원">
+          🧭 전국 보기
+        </button>
+      </div>
+
+      <!-- 17 PROVINCES QUICK JUMP BAR -->
+      <div class="quick-region-bar" id="quickRegionBar">
+        <button class="region-pill active" data-region="all">전국</button>
+        <button class="region-pill" data-region="서울">서울</button>
+        <button class="region-pill" data-region="경기">경기</button>
+        <button class="region-pill" data-region="인천">인천</button>
+        <button class="region-pill" data-region="강원">강원</button>
+        <button class="region-pill" data-region="충북">충북</button>
+        <button class="region-pill" data-region="충남">충남</button>
+        <button class="region-pill" data-region="대전">대전</button>
+        <button class="region-pill" data-region="세종">세종</button>
+        <button class="region-pill" data-region="전북">전북</button>
+        <button class="region-pill" data-region="전남">전남</button>
+        <button class="region-pill" data-region="광주">광주</button>
+        <button class="region-pill" data-region="경북">경북</button>
+        <button class="region-pill" data-region="경남">경남</button>
+        <button class="region-pill" data-region="대구">대구</button>
+        <button class="region-pill" data-region="울산">울산</button>
+        <button class="region-pill" data-region="부산">부산</button>
+        <button class="region-pill" data-region="제주">제주</button>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- DETAIL MODAL -->
+    <!-- MOBILE MENU MODAL -->
+    <!-- PWA & WEB DEPLOYMENT GUIDE MODAL -->
+  <div class="modal-overlay" id="pwaGuideModal">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:20px;">📲</span>
+          <h2 class="modal-title">스마트폰 앱 설치 및 웹 주소(URL) 배포 안내</h2>
+        </div>
+        <button class="modal-close-btn" id="closePwaGuideBtn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 18px 20px; display: flex; flex-direction: column; gap: 16px; font-size: 13.5px; line-height: 1.6;">
+        
+        <div style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:10px; padding:14px;">
+          <h3 style="font-size:14.5px; font-weight:800; color:var(--primary); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+            <span>📱</span> 1. 모바일 앱 만들기 (홈 화면에 설치)
+          </h3>
+          <p style="margin-bottom:6px; color:var(--text-main);">다운로드한 파일을 매번 찾지 않고 스마트폰 바탕화면에서 터치 한 번으로 실행할 수 있습니다.</p>
+          <ul style="padding-left:18px; color:var(--text-sub); display:flex; flex-direction:column; gap:4px; font-size:12.5px;">
+            <li><strong>삼성/안드로이드 (크롬·삼성인터넷):</strong> 브라우저 메뉴(<strong>⋮</strong>) 클릭 ➔ <strong>'홈 화면에 추가'</strong> 또는 <strong>'앱 설치'</strong> 선택</li>
+            <li><strong>아이폰/iPad (사파리):</strong> 하단 공유 버튼(<strong>⎋</strong>) 클릭 ➔ 스크롤하여 <strong>'홈 화면에 추가(➕)'</strong> 선택</li>
+            <li><strong>효과:</strong> 주소창 없는 깔끔한 전체화면 네이티브 앱처럼 동작하며 바탕화면에 앱 아이콘이 생성됩니다.</li>
+          </ul>
+        </div>
+
+        <div style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:10px; padding:14px;">
+          <h3 style="font-size:14.5px; font-weight:800; color:#059669; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+            <span>🌐</span> 2. 인터넷 웹 주소(URL)로 배포하기 (무료 1분 완성)
+          </h3>
+          <p style="margin-bottom:6px; color:var(--text-main);">다운로드 파일 없이 누구나 URL 링크를 타고 들어와 사용할 수 있는 무료 호스팅 방법입니다.</p>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:var(--text-sub);">
+            <div style="border-left:3px solid var(--primary); padding-left:10px;">
+              <strong>방법 ① Vercel (가장 추천, 초간단):</strong><br/>
+              <a href="https://vercel.com" target="_blank" style="color:var(--primary); font-weight:700;">vercel.com</a> 가입 ➔ 압축 해제한 폴더를 웹사이트에 <strong>드래그 앤 드롭</strong> ➔ 5초 만에 <code style="background:rgba(0,0,0,0.06); padding:1px 4px; border-radius:3px;">https://korea-tour.vercel.app</code> 형태의 평생 무료 HTTPS 웹 주소 생성!
+            </div>
+            <div style="border-left:3px solid #059669; padding-left:10px;">
+              <strong>방법 ② Netlify Drop:</strong><br/>
+              <a href="https://app.netlify.com/drop" target="_blank" style="color:#059669; font-weight:700;">app.netlify.com/drop</a> 접속 ➔ 폴더를 브라우저에 끌어다 놓기만 하면 즉시 무료 웹 주소 발급!
+            </div>
+            <div style="border-left:3px solid #6366f1; padding-left:10px;">
+              <strong>방법 ③ GitHub Pages:</strong><br/>
+              GitHub 저장소 생성 후 파일 업로드 ➔ Settings의 Pages 메뉴에서 Branch 활성화 시 <code style="background:rgba(0,0,0,0.06); padding:1px 4px; border-radius:3px;">https://아이디.github.io/프로젝트명</code> 주소 제공!
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="padding: 12px 20px;">
+        <button class="btn-action primary" id="confirmPwaGuideBtn" style="width:100%;">확인 및 닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="mobileMenuModal">
+    <div class="modal-card" style="max-width: 360px;">
+      <div class="modal-header">
+        <h2 class="modal-title">⚙️ 설정 및 부가 기능</h2>
+        <button class="modal-close-btn" id="closeMobileMenuBtn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn-action" id="mobilePwaBtn" style="justify-content: flex-start; padding: 10px 14px; background:#eff6ff; color:#2563eb; font-weight:700; border-color:#bfdbfe;">
+          <span>📲 스마트폰 홈 화면에 앱으로 설치하기</span>
+        </button>
+        <button class="btn-action" id="mobileParticleBtn" style="justify-content: flex-start; padding: 10px 14px;">
+          <span id="mobileParticleIcon">🍁</span> <span id="mobileParticleText">계절 효과 애니메이션 (OFF)</span>
+        </button>
+        <button class="btn-action" id="mobileApiBtn" style="justify-content: flex-start; padding: 10px 14px;">
+          <span>📡 한국관광공사 TourAPI 연동</span>
+        </button>
+        <button class="btn-action" id="mobileAdminBtn" style="justify-content: flex-start; padding: 10px 14px;">
+          <span>⚙️ 관리자 등록 / 편집 모드</span>
+        </button>
+        <button class="btn-action" id="mobileResetViewBtn" style="justify-content: flex-start; padding: 10px 14px;">
+          <span>🧭 전국 지도 중심으로 리셋</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <div class="card-badges" id="modalBadges"></div>
+          <h2 class="modal-title" id="modalTitle">행사명</h2>
+        </div>
+        <button class="modal-close-btn" id="closeDetailModalBtn">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div>
+          <div class="modal-section-title">행사 및 명소 소개</div>
+          <div class="modal-summary-box" id="modalSummary"></div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item" style="grid-column: span 2;">
+            <span class="label">정확한 개최 및 운영 기간</span>
+            <span class="value" id="modalPeriod" style="color:#2563eb; font-size:14px;">-</span>
+          </div>
+          <div class="info-item">
+            <span class="label">입장료 / 참가비</span>
+            <span class="value" id="modalFee">-</span>
+          </div>
+          <div class="info-item">
+            <span class="label">진행 상황</span>
+            <span class="value" id="modalStatusText">-</span>
+          </div>
+          <div class="info-item" style="grid-column: span 2;">
+            <span class="label">상세 주소 및 위치</span>
+            <span class="value" id="modalAddress">-</span>
+          </div>
+          <div class="info-item" id="modalPhoneContainer" style="grid-column: span 2; display:none;">
+            <span class="label">공식 안내 및 문의처</span>
+            <span class="value" id="modalPhone">-</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="modal-section-title">주요 핵심 하이라이트</div>
+          <div class="card-badges" id="modalHighlights"></div>
+        </div>
+
+        <div class="tip-box">
+          <span style="font-size: 18px;">💡</span>
+          <div>
+            <strong>현장 방문 꿀팁 & 추천 가이드</strong>
+            <p id="modalTip" style="margin-top: 3px; font-weight: normal;"></p>
+          </div>
+        </div>
+
+        <div>
+          <div class="modal-section-title">연관 태그</div>
+          <div class="card-tags" id="modalTags"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-action" id="modalCalendarBtn">📅 구글 캘린더 등록</button>
+        <button class="btn-action" id="modalNaviBtn">🚗 네이버 지도 길찾기 (주소 검색)</button>
+        <button class="btn-action" id="modalKakaoBtn">📍 카카오맵 길찾기 (주소 검색)</button>
+        <button class="btn-action primary" id="modalBookmarkBtn">⭐ 내 코스에 담기</button>
+          <button class="btn-action" id="modalVisitKoreaBtn" onclick="openVisitKoreaOfficial()" style="background:#eff6ff; color:#2563eb; border-color:#bfdbfe; font-weight:600;">🌐 대한민국 구석구석 공식 정보</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- API MODAL -->
+  <div class="modal-overlay" id="apiModal">
+    <div class="modal-card" style="max-width: 680px;">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <div class="card-badges">
+            <span class="badge badge-festival">TourAPI 4.0</span>
+            <span class="badge" style="background:#dcfce7; color:#166534;">공공데이터포털 공식 규격</span>
+          </div>
+          <h2 class="modal-title">한국관광공사 TourAPI 공공데이터 실시간 연동</h2>
+        </div>
+        <button class="modal-close-btn" id="closeApiModalBtn">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-summary-box">
+          공공데이터포털(<strong>data.go.kr</strong>)의 [한국관광공사_국문 관광정보 서비스] API 키를 등록하면 전국 각지에서 열리는 최신 축제 및 행사 데이터를 실시간으로 동기화할 수 있습니다.
+        </div>
+
+        <div class="form-group">
+          <label>공공데이터포털 일반 인증키 (Encoding 또는 Decoding 키)</label>
+          <input type="text" id="apiServiceKeyInput" class="form-input" placeholder="발급받은 서비스키를 입력하세요 (미입력 시 고화질 공식 표준 Mock 데이터 동기화)" />
+          <span style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
+            * 서비스키가 없으신 경우 아래 [공공데이터 최신 축제 동기화]를 누르시면 공식 API 규격 검증 샘플 데이터가 즉시 수신됩니다.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>조회 시작일 (YYYYMMDD)</label>
+          <input type="text" id="apiEventStartDate" class="form-input" value="20261001" />
+        </div>
+
+        <div class="info-item" style="margin-top: 5px;">
+          <span class="label">연동 엔드포인트 URL</span>
+          <span class="value" style="font-size: 11.5px; word-break: break-all; color: var(--primary);">
+            https://apis.data.go.kr/B551011/KorService1/searchFestival1?MobileOS=ETC&MobileApp=KoreaTourMap&_type=json
+          </span>
+        </div>
+
+        <div style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+          <div class="modal-section-title">실시간 수신 상태 및 응답 로그</div>
+          <pre id="apiLogOutput" style="font-size: 11px; max-height: 120px; overflow-y: auto; color: var(--text-sub); white-space: pre-wrap;">대기 중... API 키를 입력하거나 동기화 버튼을 클릭하세요.</pre>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-action" id="openDataPortalGuideBtn">🔗 data.go.kr 무료 키 발급 안내</button>
+        <button class="btn-action primary" id="fetchTourApiBtn">⚡ 공공데이터 최신 축제 동기화 실행</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN ADD/EDIT EVENT MODAL -->
+  <div class="modal-overlay" id="adminEventModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="adminModalTitle">새 축제/명소 등록</h2>
+        <button class="modal-close-btn" id="closeAdminEventModalBtn">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <input type="hidden" id="editItemId" />
+
+        <div class="form-group">
+          <label>행사 / 명소명 *</label>
+          <input type="text" id="adminFormName" class="form-input" placeholder="예: 부산 광안리 드론쇼" required />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label>지역 (17개 시도) *</label>
+            <select id="adminFormRegion" class="form-select">
+              <option value="서울">서울</option><option value="경기">경기</option><option value="인천">인천</option>
+              <option value="강원">강원</option><option value="충북">충북</option><option value="충남">충남</option>
+              <option value="대전">대전</option><option value="세종">세종</option><option value="전북">전북</option>
+              <option value="전남">전남</option><option value="광주">광주</option><option value="경북">경북</option>
+              <option value="경남">경남</option><option value="대구">대구</option><option value="울산">울산</option>
+              <option value="부산">부산</option><option value="제주">제주</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>구분 *</label>
+            <select id="adminFormType" class="form-select">
+              <option value="festival">대표축제</option>
+              <option value="attraction">관광명소</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label>테마 / 카테고리 *</label>
+            <select id="adminFormCategory" class="form-select">
+              <option value="축제/행사">축제/행사</option>
+              <option value="문화/역사">문화/역사</option>
+              <option value="자연/힐링">자연/힐링</option>
+              <option value="미식/체험">미식/체험</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>추천 계절 *</label>
+            <select id="adminFormSeason" class="form-select">
+              <option value="가을">가을</option><option value="봄">봄</option>
+              <option value="여름">여름</option><option value="겨울">겨울</option><option value="연중">연중</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label>시작일</label>
+            <input type="date" id="adminFormStartDate" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>종료일</label>
+            <input type="date" id="adminFormEndDate" class="form-input" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>운영 시기 / 회차 텍스트</label>
+          <input type="text" id="adminFormPeriod" class="form-input" placeholder="예: 2026.10.15(목) ~ 2026.10.18(일)" />
+        </div>
+
+        <div class="form-group">
+          <label>상세 주소</label>
+          <input type="text" id="adminFormAddress" class="form-input" placeholder="예: 부산광역시 중구 자갈치해안로 52" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label>위도 (Latitude)</label>
+            <input type="number" step="0.0001" id="adminFormLat" class="form-input" placeholder="35.0967" />
+          </div>
+          <div class="form-group">
+            <label>경도 (Longitude)</label>
+            <input type="number" step="0.0001" id="adminFormLng" class="form-input" placeholder="129.0306" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>이용료 / 입장료</label>
+          <input type="text" id="adminFormFee" class="form-input" placeholder="무료 (일부 유료)" />
+        </div>
+
+        <div class="form-group">
+          <label>소개 및 특징 요약 *</label>
+          <textarea id="adminFormSummary" class="form-textarea" placeholder="행사에 대한 매력적인 소개를 작성하세요."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>여행 꿀팁</label>
+          <input type="text" id="adminFormTip" class="form-input" placeholder="방문객을 위한 알짜 팁" />
+        </div>
+
+        <div class="form-group">
+          <label>해시태그 (쉼표로 구분)</label>
+          <input type="text" id="adminFormTags" class="form-input" placeholder="가을축제, 자갈치시장, 부산먹거리" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-action" id="closeAdminFormBtn">취소</button>
+        <button class="btn-action primary" id="saveAdminItemBtn">저장하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ITINERARY DRAWER -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <div class="itinerary-drawer" id="itineraryDrawer">
+    <div class="drawer-header">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <h3 style="font-size: 16px; font-weight: 800;">📍 내 여행 코스 플래너</h3>
+        <span class="badge-count" id="drawerBadgeCount">0</span>
+      </div>
+      <button class="modal-close-btn" id="closeDrawerBtn">&times;</button>
+    </div>
+    
+    <div class="drawer-body" id="itineraryList"></div>
+
+    <div style="padding:16px 20px; border-top:1px solid var(--border-color); display:flex; flex-direction:column; gap:8px;">
+      <button class="btn-action primary" id="copyItineraryBtn">📋 여행 코스 텍스트 복사</button>
+      <button class="btn-action" id="clearItineraryBtn" style="color:#ef4444; border-color:#fca5a5;">🗑️ 코스 전체 비우기</button>
+    </div>
+  </div>
+
+  <script>
+    const REGION_META = {"all": {"name": "전국", "center": [35.9078, 127.7669], "zoom": 7}, "서울": {"name": "서울특별시", "center": [37.5665, 126.978], "zoom": 12}, "경기": {"name": "경기도", "center": [37.4138, 127.3183], "zoom": 9}, "인천": {"name": "인천광역시", "center": [37.4563, 126.6852], "zoom": 11}, "강원": {"name": "강원특별자치도", "center": [37.8228, 128.2555], "zoom": 9}, "충북": {"name": "충청북도", "center": [36.7357, 127.8912], "zoom": 9}, "충남": {"name": "충청남도", "center": [36.5184, 126.8], "zoom": 9}, "대전": {"name": "대전광역시", "center": [36.3504, 127.3845], "zoom": 12}, "세종": {"name": "세종특별자치시", "center": [36.48, 127.289], "zoom": 12}, "전북": {"name": "전북특별자치도", "center": [35.7175, 127.153], "zoom": 9}, "전남": {"name": "전라남도", "center": [34.8679, 126.991], "zoom": 9}, "광주": {"name": "광주광역시", "center": [35.1595, 126.8526], "zoom": 12}, "경북": {"name": "경상북도", "center": [36.476, 128.7056], "zoom": 9}, "경남": {"name": "경상남도", "center": [35.3606, 128.2132], "zoom": 9}, "대구": {"name": "대구광역시", "center": [35.8714, 128.6014], "zoom": 12}, "울산": {"name": "울산광역시", "center": [35.5384, 129.3114], "zoom": 12}, "부산": {"name": "부산광역시", "center": [35.1796, 129.0756], "zoom": 12}, "제주": {"name": "제주특별자치도", "center": [33.3853, 126.554], "zoom": 10}};
+    const DEFAULT_DATA = [{"id": "seoul-01", "name": "경복궁 & 근정전", "type": "attraction", "category": "문화/역사", "region": "서울", "provinceGroup": "수도권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 37.5796, "lng": 126.977, "address": "서울특별시 종로구 사직로 161", "summary": "조선 왕조의 법궁으로, 근정전과 경회루의 웅장한 누각 및 사계절 아름다운 정원을 간직한 대한민국 대표 문화유산입니다.", "highlights": ["조선 제1의 법궁", "경회루 야간관람", "수문장 교대의식", "한복 무료입장"], "tip": "한복 착용 시 무료입장이 가능하며, 봄·가을 야간 특별관람은 사전 예약이 필수입니다.", "fee": "성인(만 25~64세) 3,000원 / 한복 착용자 무료", "tags": ["조선왕궁", "포토스팟", "유네스코잠정목록", "야경명소"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "seoul-02", "name": "2026 서울세계불꽃축제", "type": "festival", "category": "야경/빛축제", "region": "서울", "provinceGroup": "수도권", "season": "가을", "period": "2026.10.03(토) [2026년 행사 종료]", "lat": 37.5284, "lng": 126.9328, "address": "서울특별시 영등포구 여의동로 330 (여의도동 84-9)", "summary": "한화그룹과 서울시가 함께 주최하는 가을 한강의 메가 이벤트. 전 세계 유명 불꽃 연출팀들이 참여하여 여의도 하늘을 환상적인 불꽃과 음악으로 수놓았습니다.", "highlights": ["한국·미국·일본 3개국 불꽃 멀티미디어 쇼", "음악과 어우러진 스토리텔링 불꽃", "한강 수상 드론 라이트쇼"], "tip": "축제 당일 오후부터 여의나루역 및 여의동로 교통이 통제되므로 샛강역, 대방역 등 인근 지하철역을 이용하는 것이 좋습니다.", "fee": "무료 (공식 지정 관람석 유료 티켓 별도)", "tags": ["서울불꽃축제", "여의도한강공원", "가을야경", "한화불꽃축제"], "startDate": "2026-10-03", "endDate": "2026-10-03", "status": "closed", "phone": "02-789-5114 (한화 불꽃축제 운영사무국)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=69a90d06-50e0-405a-97a3-6164a64bd016"}, {"id": "seoul-03", "name": "북촌 한옥마을 & 삼청동길", "type": "attraction", "category": "문화/역사", "region": "서울", "provinceGroup": "수도권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 37.5826, "lng": 126.9836, "address": "서울특별시 종로구 계동길 37", "summary": "경복궁과 창덕궁 사이에 위치하여 600년 조선의 고풍스러운 전통 기와집 골목과 현대적 갤러리·카페가 조화를 이루는 명소입니다.", "highlights": ["북촌 8경", "전통 한옥 주거지", "삼청동 카페거리", "공방 체험"], "tip": "실제 주민이 거주하는 정숙구역이므로 일요일은 쉼터의 날로 방문을 자제하고 소음에 유의하세요.", "fee": "무료 (전통공예 체험비 별도)", "tags": ["한옥", "전통체험", "삼청동", "골목길투어"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "seoul-04", "name": "광장시장 먹거리 골목", "type": "attraction", "category": "미식/체험", "region": "서울", "provinceGroup": "수도권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 37.5701, "lng": 126.9997, "address": "서울특별시 종로구 창경궁로 88", "summary": "100년이 넘는 전통을 자랑하는 서울 최대 재래시장으로, 마약김밥, 빈대떡, 육회 등 K-푸드의 진수를 맛볼 수 있는 미식의 성지입니다.", "highlights": ["녹두빈대떡", "광장육회골목", "마약김밥", "전통시장 바이브"], "tip": "주말 저녁은 인파가 매우 몰리므로 평일 오후 3~5시 사이에 방문하면 여유롭게 즐길 수 있습니다.", "fee": "무료입장 (먹거리별 상이)", "tags": ["K푸드", "전통시장", "야식거리", "길거리음식"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "gyeonggi-01", "name": "제63회 수원화성문화제", "type": "festival", "category": "문화/역사", "region": "경기", "provinceGroup": "수도권", "season": "가을", "period": "2026.10.04(일) ~ 2026.10.11(일) (8일간) [🔴 오늘 진행중 (LIVE)]", "lat": 37.2828, "lng": 127.0142, "address": "경기도 수원시 팔달구 정조로 825 (남창동) 행궁광장", "summary": "1795년 정조대왕의 8일간 화성 행차을 재해석한 수원 대표 종합문화예술축제입니다. 유네스코 세계유산 수원화성과 화성행궁 일원에서 국내 최대 왕실 퍼레이드인 정조대왕 능행차와 고품격 야간 공연이 진행 중입니다.", "highlights": ["정조대왕 능행차 공동재현", "주제공연 \"수원 판타지 - 야조\"", "시간여행 행궁야화", "수원가마레이스"], "tip": "축제장 내 먹거리 부스가 없으므로 인근 행궁동 공방거리 맛집 및 통닭거리 식당을 이용하시기 바랍니다.", "fee": "무료 (일부 사전예약 프로그램 유료)", "tags": ["문화관광축제", "수원화성", "정조대왕능행차", "화성행궁", "오늘진행중"], "startDate": "2026-10-04", "endDate": "2026-10-11", "status": "closed", "phone": "031-5191-3647 (수원문화재단)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=95d65f28-6c8f-4226-9697-a5a4e9edc801"}, {"id": "gyeonggi-02", "name": "제23회 자라섬 재즈페스티벌", "type": "festival", "category": "문화/예술", "region": "경기", "provinceGroup": "수도권", "season": "가을", "period": "2026.10.16(금) ~ 2026.10.18(일) (3일간) [개최 예정 D-11]", "lat": 37.8202, "lng": 127.5255, "address": "경기도 가평군 가평읍 자라섬로 60 (달전리 1-1)", "summary": "북한강을 배경으로 푸른 잔디밭에서 펼쳐지는 아시아 최고의 야외 재즈 음악 축제입니다. 가을 정취와 어우러진 세계 정상급 재즈 뮤지션들의 선율을 돗자리를 펴고 와인과 함께 감상할 수 있습니다.", "highlights": ["재즈 아일랜드 메인 스테이지", "파티 스테이지 & 어쿠스틱 스테이지", "가평 특산물 뱅쇼 & 로컬 푸드", "미드나잇 재즈 캠핑"], "tip": "일교차가 매우 크므로 방한 겉옷, 담요, 방수 돗자리와 등받이 좌식의자를 준비하시면 훨씬 쾌적합니다.", "fee": "1일권 80,000원 / 2일권 140,000원 / 3일권 180,000원", "tags": ["문화관광축제", "자라섬", "가평여행", "재즈페스티벌", "가을소풍", "개최예정"], "startDate": "2026-10-16", "endDate": "2026-10-18", "status": "upcoming", "phone": "031-581-2813", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=8b7f0ad9-384b-4b55-ba4b-5a6804cae161"}, {"id": "gyeonggi-03", "name": "포천 아트밸리 & 천주호", "type": "attraction", "category": "자연/힐링", "region": "경기", "provinceGroup": "수도권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 37.9254, "lng": 127.2407, "address": "경기도 포천시 신북면 아트밸리로 234", "summary": "폐화강암 채석장을 친환경 문화예술 복합공간으로 재탄생시킨 곳으로, 에메랄드빛 천주호 절벽과 조각공원이 환상적인 절경을 이룹니다.", "highlights": ["에메랄드빛 천주호", "모노레일", "천문과학관", "드라마 촬영지"], "tip": "모노레일을 타고 상부까지 편하게 올라간 뒤 걸어 내려오면서 천주호와 야외 조각을 감상하는 코스를 추천합니다.", "fee": "성인 5,000원 (모노레일 별도)", "tags": ["자연치유", "화강암절벽", "포토존", "가족여행"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "gyeonggi-04", "name": "파주 임진각 평화누리공원", "type": "attraction", "category": "문화/역사", "region": "경기", "provinceGroup": "수도권", "season": "봄", "period": "상시 운영 (사계절 관람)", "lat": 37.8894, "lng": 126.7428, "address": "경기도 파주시 문산읍 임진각로 148-40", "summary": "분단의 아픔과 평화의 염원이 공존하는 안보생태관광지로, 3천여 개의 바람개비가 돌아가는 바람의 언덕과 임진강 평화곤돌라가 있습니다.", "highlights": ["바람의 언덕 바람개비", "임진강 평화곤돌라", "독개다리 전쟁흔적", "DMZ 생태평화관광"], "tip": "임진강 평화곤돌라 탑승 시 민통선 내부로 진입하므로 신분증(주민등록증/운전면허증/여권)을 반드시 지참해야 합니다.", "fee": "공원 입장 무료 (곤돌라 대인 왕복 11,000원)", "tags": ["DMZ평화관광", "바람개비언덕", "가족소풍", "평화곤돌라"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "incheon-01", "name": "인천 차이나타운 & 개항장 거리", "type": "attraction", "category": "문화/역사", "region": "인천", "provinceGroup": "수도권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 37.4754, "lng": 126.618, "address": "인천광역시 중구 차이나타운로 59번길 12", "summary": "1883년 개항 이후 140여 년 역사를 간직한 한국 유일의 전통 차이나타운과 근대 일본·서양식 건축물이 남아있는 살아있는 역사박물관입니다.", "highlights": ["원조 짜장면 거리", "근대역사문화타운", "송월동 동화마을", "월미바다열차"], "tip": "짜장면박물관과 대불호텔 전시관을 함께 둘러본 후 화덕만두, 홍두병 등 길거리 간식을 즐겨보세요.", "fee": "거리 관람 무료 (박물관 소액 통합권)", "tags": ["근대유산", "차이나타운", "짜장면원조", "개항장"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "incheon-02", "name": "송도 센트럴파크 & 수상택시", "type": "attraction", "category": "자연/힐링", "region": "인천", "provinceGroup": "수도권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 37.3927, "lng": 126.6393, "address": "인천광역시 연수구 컨벤시아대로 160", "summary": "국내 최초로 바닷물을 이용한 해수공원으로, 초고층 미래형 마천루 사이로 카약, 보트, 수상택시를 타고 수상 레저와 야경을 만끽할 수 있습니다.", "highlights": ["해수공원 보트체험", "G타워 무료전망대", "트라이보울 야경", "사슴사육장"], "tip": "G타워 33층 전망대에 무료로 올라가면 송도 신도시 전체와 인천대교가 한눈에 내려다보입니다.", "fee": "공원 무료 (문보트/카약 대여료 별도)", "tags": ["송도야경", "데이트명소", "문보트", "미래도시"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "incheon-03", "name": "2026 인천 펜타포트 락 페스티벌", "type": "festival", "category": "문화/예술", "region": "인천", "provinceGroup": "수도권", "season": "여름", "period": "2026.08.07(금) ~ 2026.08.09(일) [2026년 행사 종료]", "lat": 37.4087, "lng": 126.6315, "address": "인천광역시 연수구 센트럴로 350 (동춘동 947)", "summary": "글로벌 음악 축제로 도약한 대한민국 록 페스티벌의 자존심. 2026년 8월 송도달빛축제공원에서 국내외 최정상 록 밴드와 관객들이 하나 되어 뜨거운 열기를 뿜어냈습니다.", "highlights": ["국내외 헤드라이너 메인스테이지 공연", "펜타 슈퍼루키 경연", "한여름 록 캠핑존 & 야간 쿨링존", "다채로운 F&B 푸드존"], "tip": "송도달빛축제공원역(인천 1호선)에서 도보 5분 거리이므로 대중교통 이용이 가장 편리합니다.", "fee": "유료 (1일권 120,000원 / 3일권 240,000원)", "tags": ["문화관광축제", "펜타포트", "송도달빛축제공원", "락페스티벌"], "startDate": "2026-08-07", "endDate": "2026-08-09", "status": "closed", "phone": "1899-7188", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=8e43bab9-8e16-4925-94f9-c03eb7a8e72d"}, {"id": "gangwon-01", "name": "2027 얼음나라 화천 산천어축제", "type": "festival", "category": "겨울/체험", "region": "강원", "provinceGroup": "강원권", "season": "겨울", "period": "2027.01.09(토) ~ 2027.01.31(일) [2027년 겨울 개최 예정]", "lat": 38.1065, "lng": 127.7082, "address": "강원특별자치도 화천군 화천읍 산천어길 137 (중리 186-5)", "summary": "미국 CNN이 \"겨울철 세계 7대 불가사의\"로 소개한 세계 4대 겨울 축제. 꽁꽁 얼어붙은 화천천 얼음판 위에서 얼음낚시와 산천어 맨손잡기, 눈썰매를 즐길 수 있습니다.", "highlights": ["얼음구멍 산천어 얼음낚시", "한겨울 반바지 산천어 맨손잡기", "세계최대 실내 얼음조각광장", "산천어 즉석 회센터 & 숯불구이터"], "tip": "잡은 산천어는 1인당 최대 3마리까지 반출 가능하며, 현장 구이터에서 소정의 비용으로 신선한 회나 구이로 맛볼 수 있습니다.", "fee": "체험권 일반 15,000원 (화천사랑상품권 5,000원 환급)", "tags": ["글로벌축제", "화천산천어축제", "겨울축제", "얼음낚시", "개최예정"], "startDate": "2027-01-09", "endDate": "2027-01-31", "status": "upcoming", "phone": "1688-3005 (재단법인나라)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=02a1c2ab-bce7-404a-9c8f-4eb4ac69acb3"}, {"id": "gangwon-02", "name": "제18회 강릉 커피축제", "type": "festival", "category": "미식/체험", "region": "강원", "provinceGroup": "강원권", "season": "가을", "period": "2026.10.21(수) ~ 2026.10.25(일) (5일간) [개최 예정 D-16]", "lat": 37.7718, "lng": 128.9482, "address": "강원특별자치도 강릉시 창해로14번길 20-1 (견소동)", "summary": "안목해변의 커피자판기 추억에서 시작하여 대한민국 대표 커피도시로 발전한 강릉의 카페와 로스팅 장인들이 함께하는 문화관광축제입니다.", "highlights": ["100인 100미 핸드드립 퍼포먼스", "바리스타 챔피언십 경연대회", "안목해변 커피거리 스탬프투어", "원두 로스팅 마스터클래스"], "tip": "개인 텀블러를 지참하시면 무료 핸드드립 시음권과 친환경 기념품을 드립니다.", "fee": "입장 무료 (일부 체험 유료)", "tags": ["문화관광축제", "강릉커피축제", "안목해변", "커피거리", "개최예정"], "startDate": "2026-10-21", "endDate": "2026-10-25", "status": "upcoming", "phone": "033-647-6802 (강릉문화재단)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=eff62395-e989-4993-b5ab-1b1808220401"}, {"id": "gangwon-03", "name": "설악산 국립공원 & 신흥사", "type": "attraction", "category": "자연/힐링", "region": "강원", "provinceGroup": "강원권", "season": "가을", "period": "상시 운영 (사계절 관람)", "lat": 38.1732, "lng": 128.4657, "address": "강원특별자치도 속초시 설악산로 833", "summary": "한반도의 척추 백두대간의 절경을 대표하는 명산으로, 기암괴석과 비선대, 울산바위, 권금성 케이블카 및 가을 단풍이 절정을 이룹니다.", "highlights": ["권금성 케이블카", "울산바위 트레킹", "비선대 암벽", "천불동계곡 단풍"], "tip": "권금성 케이블카는 기상 상황에 따라 운행 여부가 달라지며 당일 현장 발권만 가능하니 오전에 방문하는 것이 유리합니다.", "fee": "국립공원 입장료 무료 (케이블카 별도)", "tags": ["명산", "단풍명소", "국립공원", "트레킹"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "gangwon-04", "name": "평창 대관령 양떼목장", "type": "attraction", "category": "자연/힐링", "region": "강원", "provinceGroup": "강원권", "season": "봄", "period": "상시 운영 (사계절 관람)", "lat": 37.6931, "lng": 128.7516, "address": "강원특별자치도 평창군 대관령면 대관령마루길 483-32", "summary": "해발 850m 고원에 펼쳐진 이국적인 초원으로, 봄·여름의 푸른 목초지 방목과 겨울철 하얀 설경이 장관을 이루는 힐링 명소입니다.", "highlights": ["고원 산책로", "건초주기 먹이체험", "대관령 설경", "목장 오두막 포토존"], "tip": "산책로 정상에 오르면 맑은 날 강릉 시내와 동해 바다까지 조망할 수 있습니다.", "fee": "대인 9,000원 (건초체험 포함)", "tags": ["초원", "힐링목장", "양떼체험", "사진명소"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "gangwon-05", "name": "춘천 남이섬 (나미나라공화국)", "type": "attraction", "category": "자연/힐링", "region": "강원", "provinceGroup": "강원권", "season": "가을", "period": "상시 운영 (사계절 관람)", "lat": 37.7913, "lng": 127.5255, "address": "강원특별자치도 춘천시 남산면 남이섬길 1", "summary": "북한강 위에 떠 있는 동화 같은 섬으로, 메타세쿼이아길, 은행나무길의 눈부신 단풍과 겨울연가 촬영지로 세계적 명성을 얻은 관광지입니다.", "highlights": ["메타세쿼이아길", "짚와이어 입도 액티비티", "은행나무 황금터널", "자전거 하이킹"], "tip": "짚와이어를 타고 시속 80km로 북한강을 가로질러 남이섬으로 날아가 들어가는 스릴 넘치는 코스를 추천합니다.", "fee": "일반 입장권(도선료 포함) 16,000원", "tags": ["남이섬", "메타세쿼이아", "단풍길", "가을감성"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "chungnam-01", "name": "제29회 보령 머드축제", "type": "festival", "category": "해양/레저", "region": "충남", "provinceGroup": "충청권", "season": "여름", "period": "2026.07.24(금) ~ 2026.08.09(일) [2026년 행사 종료]", "lat": 36.3052, "lng": 126.5168, "address": "충청남도 보령시 대해로 897-15 (신흑동 2282)", "summary": "보령산 천연 머드를 온몸에 바르고 뒹구는 세계적인 K-축제. 2026년 여름 대천해수욕장에서 화려한 K-POP 공연과 함께 성황리에 개최 후 종료되었습니다.", "highlights": ["대형 머드 슬라이드 & 머드 풀", "머드몹신 & EDM 워터파크", "해변 드론라이트쇼", "머드 뷰티 케어 체험"], "tip": "축제장 머드 체험 시 전용 래시가드나 버려도 되는 옷을 착용하시는 것이 좋습니다.", "fee": "일반존 성인 [주중] 12,000원 / [주말] 16,000원", "tags": ["글로벌축제", "보령머드축제", "대천해수욕장", "여름축제"], "startDate": "2026-07-24", "endDate": "2026-08-09", "status": "closed", "phone": "041-930-0891 (보령축제관광재단)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=910bb144-bf74-4eee-9e91-8fbcbaf302ac"}, {"id": "chungnam-02", "name": "제72회 백제문화제 (공주·부여)", "type": "festival", "category": "문화/역사", "region": "충남", "provinceGroup": "충청권", "season": "가을", "period": "2026.10.03(토) ~ 2026.10.11(일) (9일간) [🔴 오늘 진행중 (LIVE)]", "lat": 36.2796, "lng": 126.9038, "address": "충청남도 부여군 부여읍 정림로 83 (정림사지 및 시가지 일원)", "summary": "1955년부터 이어져 온 대한민국 대표 역사문화축제. 올해 제72회는 \"아름다운 백제, 빛나는 사비\"를 주제로 부여 정림사지, 석탑로, 관북리유적 및 공주 공산성 일대에서 화려한 역사문화행렬과 야간경관을 선보입니다.", "highlights": ["백제역사문화행렬 퍼레이드", "정림사지 5층석탑 미디어아트", "사비 백제 수문장 교대의식", "백제마을 고분벽화 체험"], "tip": "부여 시가지 차 없는 거리 운영으로 백제문화단지나 구드래공원 주차장에 주차 후 셔틀버스를 탑승하세요.", "fee": "무료", "tags": ["문화관광축제", "부여정림사지", "공주공산성", "백제문화제", "오늘진행중"], "startDate": "2026-10-03", "endDate": "2026-10-11", "status": "closed", "phone": "041-830-2211 (백제문화제재단)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=a59f128f-7a51-4523-bb1b-72a3a1c9c20a"}, {"id": "chungnam-03", "name": "2026 태안 세계튤립꽃박람회", "type": "festival", "category": "계절/자연", "region": "충남", "provinceGroup": "충청권", "season": "봄", "period": "2026.04.10(금) ~ 2026.05.07(목) [2026년 행사 종료]", "lat": 36.6341, "lng": 126.3155, "address": "충청남도 태안군 안면읍 꽃지해안로 400 (승언리 339-38)", "summary": "세계 5대 튤립축제로 손꼽히는 서해안 최대 화훼 박람회. 안면도 꽃지해안공원에서 수백만 송이의 형형색색 튤립과 서해안의 붉은 노을이 어우러지는 봄꽃 축제입니다.", "highlights": ["세계 각국 희귀 튤립 대단지 정원", "꽃지해변 할미·할아비 바위 낙조 뷰", "야간 빛 축제 연계 관람", "열대식물 전시관"], "tip": "코리아플라워파크 바로 앞 꽃지해수욕장의 할미·할아비 바위 낙조는 사진 촬영 명소입니다.", "fee": "성인 14,000원 / 청소년 11,000원", "tags": ["세계튤립축제", "태안여행", "코리아플라워파크", "꽃지해수욕장"], "startDate": "2026-04-10", "endDate": "2026-05-07", "status": "upcoming", "phone": "041-675-5533 (코리아플라워파크)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=614022a1-df6e-44d5-ab23-1d04112e4f0d"}, {"id": "chungbuk-01", "name": "단양 만천하스카이워크 & 도담삼봉", "type": "attraction", "category": "자연/힐링", "region": "충북", "provinceGroup": "충청권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 36.9688, "lng": 128.3444, "address": "충청북도 단양군 적성면 옷바위길 10", "summary": "남한강 절벽 위 80~90m 수면 위로 뻗은 유리 전망대에서 소백산과 남한강 절경을 감상하고, 짚와이어와 알파인코스터의 스릴을 즐길 수 있습니다.", "highlights": ["유리바닥 스카이워크", "짚와이어 액티비티", "단양팔경 도담삼봉", "단양 잔도길"], "tip": "스카이워크 주차장에서 잔도길을 따라 강변을 산책한 뒤 단양 구경시장에서 마늘떡갈비와 마늘순대를 맛보세요.", "fee": "스카이워크 성인 4,000원 (체험시설 별도)", "tags": ["단양팔경", "스카이워크", "액티비티", "남한강비경"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "chungbuk-02", "name": "제천 청풍호반 케이블카 & 비봉산", "type": "attraction", "category": "자연/힐링", "region": "충북", "provinceGroup": "충청권", "season": "봄", "period": "상시 운영 (사계절 관람)", "lat": 37.0177, "lng": 128.1633, "address": "충청북도 제천시 청풍면 문화재길 166", "summary": "내륙의 바다 청풍호를 가로질러 해발 531m 비봉산 정상까지 2.3km를 운행하며, 다도해를 닮은 청풍호의 비경을 360도 파노라마로 감상합니다.", "highlights": ["2.3km 호수횡단 케이블카", "비봉산 정상 모먼트 캡슐", "청풍문화재단지", "내륙의 다도해"], "tip": "봄철 청풍호 일대는 벚꽃 축제 명소로 케이블카 탑승 전 벚꽃 드라이브 코스를 함께 즐기면 좋습니다.", "fee": "일반 캐빈 성인 왕복 18,000원", "tags": ["청풍호", "케이블카", "호수조망", "제천명소"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "daejeon-01", "name": "대전 엑스포과학공원 한빛탑 & 음악분수", "type": "attraction", "category": "문화/역사", "region": "대전", "provinceGroup": "충청권", "season": "여름", "period": "상시 운영 (사계절 관람)", "lat": 36.3762, "lng": 127.3845, "address": "대전광역시 유성구 대덕대로 480", "summary": "대한민국 과학수도 대전의 상징 한빛탑 전망대와 밤마다 화려한 미디어파사드 및 음악분수 레이저쇼가 펼쳐지는 첨단 랜드마크입니다.", "highlights": ["한빛탑 원형전망대", "환상의 음악분수쇼", "국립중앙과학관 연계", "대전 꿈돌이 포토존"], "tip": "한빛탑 2층 카페에서 커피를 마시며 야경을 조망할 수 있으며 여름밤 음악분수는 가족·연인들의 인기 피크닉 명소입니다.", "fee": "무료입장", "tags": ["과학수도", "음악분수", "야경스팟", "엑스포공원"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "daejeon-02", "name": "2026 대전 빵축제", "type": "festival", "category": "미식/체험", "region": "대전", "provinceGroup": "충청권", "season": "가을", "period": "2026.10.17(토) ~ 2026.10.18(일) (2일간) [개최 예정 D-12]", "lat": 36.3765, "lng": 127.3878, "address": "대전광역시 유성구 도룡동 3-1", "summary": "대한민국 대표 빵의 도시 대전에서 펼쳐지는 빵 축제. 성심당을 포함한 대전 70여 개 명품 베이커리가 엑스포과학공원 한빛탑 광장에 모여 갓 구운 빵과 음악을 선사합니다.", "highlights": ["대전 대표 70대 빵집 팝업스토어", "성심당 마스터 셰프 라이브 베이킹", "빵 크레인 뽑기 & 골든벨", "한빛탑 음악분수 야간 피크닉"], "tip": "인기 빵집 제품은 조기 품절되므로 오전 방문을 추천하며, 한빛탑 전망대와 음악분수 관람을 함께 즐기면 좋습니다.", "fee": "입장 무료 (베이커리 구매 개별 결제)", "tags": ["대전관광공사", "성심당", "엑스포과학공원", "한빛탑", "빵지순례", "개최예정"], "startDate": "2026-10-17", "endDate": "2026-10-18", "status": "upcoming", "phone": "042-250-1114 (대전관광공사)", "visitKoreaUrl": "https://daejeontour.co.kr/festival_djt/46"}, {"id": "sejong-01", "name": "세종 국립세종수목원 & 호수공원", "type": "attraction", "category": "자연/힐링", "region": "세종", "provinceGroup": "충청권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 36.4958, "lng": 127.2917, "address": "세종특별자치시 수목원로 136", "summary": "국내 최초의 도심형 국립수목원으로 붓꽃 꽃잎을 형상화한 거대한 사계절 전시온실과 한국전통정원, 희귀특산식물원을 갖추고 있습니다.", "highlights": ["사계절 대형 온실", "한국전통정원 궁궐전", "세종호수공원 산책로", "반려식물 상담실"], "tip": "사계절온실의 지중해원과 열대온실은 겨울철에도 따뜻하게 이국적인 식물과 꽃을 감상할 수 있어 사계절 인기가 높습니다.", "fee": "성인 5,000원", "tags": ["도심수목원", "사계절온실", "힐링산책", "세종가볼만한곳"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "jeonbuk-01", "name": "2026 전주 비빔밥축제", "type": "festival", "category": "미식/체험", "region": "전북", "provinceGroup": "호남권", "season": "가을", "period": "2026.10.02(금) ~ 2026.10.04(일) [2026년 행사 종료]", "lat": 35.8492, "lng": 127.1219, "address": "전북특별자치도 전주시 덕진구 권삼득로 390 (덕진동1가) 덕진공원 일원", "summary": "유네스코 음식창의도시 전주의 대표 전통음식인 전주비빔밥을 테마로 열리는 미식축제입니다. 2026년 행사는 덕진공원 일원에서 10월 2일부터 4일까지 성황리에 펼쳐진 후 종료되었습니다.", "highlights": ["초대형 대동비빔밥 퍼포먼스", "전주 명인 쿠킹 클래스", "비빔 푸드트럭 빌리지", "덕진호수 야간 버스킹"], "tip": "행사 종료 후에도 덕진공원 연화교 산책로와 전주 한옥마을 일대에서 맛있는 비빔밥 맛집 투어를 즐길 수 있습니다.", "fee": "무료 (체험 및 시식 별도)", "tags": ["전주시", "비빔밥축제", "덕진공원", "유네스코음식창의도시"], "startDate": "2026-10-02", "endDate": "2026-10-04", "status": "upcoming", "phone": "070-4155-0318", "visitKoreaUrl": "https://tour.jeonju.go.kr/index.jeonju?menuCd=DOM_000000102002000000"}, {"id": "jeonbuk-02", "name": "제96회 남원 춘향제", "type": "festival", "category": "전통/민속", "region": "전북", "provinceGroup": "호남권", "season": "봄", "period": "2026.04.30(목) ~ 2026.05.06(수) [2026년 행사 종료]", "lat": 35.4042, "lng": 127.3789, "address": "전북특별자치도 남원시 요천로 1447 (천거동 78)", "summary": "1931년에 시작된 대한민국 가장 오래된의 전통 축제. 춘향의 지고지순한 사랑과 정절을 기리며 광한루원과 요천변을 배경으로 춘향선발대회, 전통 판소리, 대동길놀이가 열립니다.", "highlights": ["대한민국 춘향선발대회", "광한루 야간 국악대제전", "대동길놀이 퍼레이드", "월매 야시장 먹거리"], "tip": "한복을 착용하고 방문하면 광한루원 무료입장 혜택을 누릴 수 있습니다.", "fee": "무료 (광한루원 무료입장 연계 프로그램)", "tags": ["춘향제", "광한루원", "남원여행", "전통축제"], "startDate": "2026-04-30", "endDate": "2026-05-06", "status": "upcoming", "phone": "063-620-5776 (춘향제전위원회)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=31a0fb6b-c075-402b-9cf7-a79e16451aab"}, {"id": "jeonbuk-03", "name": "제30회 무주 반딧불축제", "type": "festival", "category": "생태/자연", "region": "전북", "provinceGroup": "호남권", "season": "여름", "period": "2026.09.04(금) ~ 2026.09.12(토) [2026년 행사 종료]", "lat": 35.9868, "lng": 127.6608, "address": "전북특별자치도 무주군 무주읍 한풍루로 326-17", "summary": "천연기념물 반딧불이와 청정 자연환경을 보존하기 위해 열리는 대한민국 대표 생태환경 문화관광축제입니다. 2026년 9월 무주 남대천 일원에서 개최 후 성황리에 종료되었습니다.", "highlights": ["반딧불이 야간 신비탐사", "남대천 안성낙화놀이 전통 불꽃", "조선왕조실록 봉안행렬", "빛의 거리 반디 판타지"], "tip": "대표 프로그램인 반딧불이 신비탐사는 사전 온라인 예약이 필수입니다.", "fee": "입장 무료 (신비탐사 버스투어 15,000원)", "tags": ["문화관광축제", "무주반딧불축제", "생태관광", "낙화놀이"], "startDate": "2026-09-04", "endDate": "2026-09-12", "status": "closed", "phone": "063-324-2440 (무주반딧불축제제전위원회)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=0e803334-1e3d-4c57-9005-e4ec9c87657f"}, {"id": "jeonnam-01", "name": "순천만 국가정원 & 순천만습지", "type": "attraction", "category": "자연/힐링", "region": "전남", "provinceGroup": "호남권", "season": "가을", "period": "상시 운영 (사계절 관람)", "lat": 34.9312, "lng": 127.5097, "address": "전라남도 순천시 국가정원1호길 47", "summary": "대한민국 제1호 국가정원과 세계 5대 연안습지인 순천만 갈대군락이 이어져 있으며, 가을 은빛 갈대밭과 흑두루미 월동지로 세계적인 생태명소입니다.", "highlights": ["국가정원 1호", "순천만 갈대밭 덱길", "용산전망대 S자 갯벌수로", "스카이큐브 모노레일"], "tip": "순천만 국가정원과 습지는 스카이큐브(무인궤도열차)로 연결되며, 통합입장권으로 두 곳 모두 관람 가능합니다.", "fee": "성인 일반 10,000원 (정원+습지 통합권)", "tags": ["생태관광", "갈대밭", "국가정원", "일몰명소"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "jeonnam-02", "name": "여수 밤바다 & 낭만포차 & 해상케이블카", "type": "attraction", "category": "미식/체험", "region": "전남", "provinceGroup": "호남권", "season": "여름", "period": "상시 운영 (사계절 관람)", "lat": 34.7436, "lng": 127.7441, "address": "전라남도 여수시 하멜로 102 (거북선대교 하부 낭만포차거리)", "summary": "노래로 널리 알려진 낭만의 해양관광도시로, 돌산대교와 거북선대교를 가로지르는 해상케이블카, 오동도 동백숲, 돌문어삼합이 유명합니다.", "highlights": ["여수해상케이블카", "낭만포차 돌문어삼합", "오동도 동백열차", "돌산공원 야경"], "tip": "해상케이블카는 바닥이 투명한 크리스탈 캐빈을 이용하면 발아래 바다가 아찔하게 펼쳐집니다.", "fee": "공원 무료, 해상케이블카 왕복 성인 17,000원", "tags": ["여수밤바다", "낭만포차", "해상케이블카", "바다여행"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "jeonnam-03", "name": "제49회 보성 다향대축제", "type": "festival", "category": "미식/체험", "region": "전남", "provinceGroup": "호남권", "season": "봄", "period": "2026.05.01(금) ~ 2026.05.05(화) [2026년 행사 종료]", "lat": 34.7176, "lng": 127.0833, "address": "전라남도 보성군 보성읍 녹차로 775 (봉산리)", "summary": "푸르른 5월의 계단식 차밭을 배경으로 햇차 덖기, 다도 체험, 녹차 요리를 즐기며 지친 심신을 치유하는 대한민국 대표 힐링 차 문화관광축제입니다.", "highlights": ["햇차 만들기 및 차 덖기 체험", "월드 티 푸드 경연대회", "보성 티 마스터 클래스", "녹차밭 힐링 걷기대회"], "tip": "아침 일찍 방문하시면 물안개 핀 신비로운 대한다원 삼나무길과 연초록빛 찻잎을 사진에 담을 수 있습니다.", "fee": "무료", "tags": ["문화관광축제", "보성녹차", "대한다원", "한국차문화공원", "힐링여행"], "startDate": "2026-05-01", "endDate": "2026-05-05", "status": "upcoming", "phone": "061-850-5211 (보성다향대축제추진위원회)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=fefc8ae8-2979-4bdc-b76c-7fe6f2078f47"}, {"id": "jeonnam-04", "name": "담양 죽녹원 & 관방제림", "type": "attraction", "category": "자연/힐링", "region": "전남", "provinceGroup": "호남권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 35.3275, "lng": 126.9855, "address": "전라남도 담양군 담양읍 죽녹원로 119", "summary": "31만㎡의 울창한 대나무 숲길에서 음이온을 마시며 산책하는 힐링 명소로, 인근 국수거리와 메타세쿼이아길로 이어지는 생태 여행 코스입니다.", "highlights": ["운수대통길 대숲 산책", "이이남 아트센터", "영산강 관방제림", "담양 떡갈비&대통밥"], "tip": "죽녹원 후문 방향의 시가문화촌에서 전통 한옥 툇마루에 앉아 죽로차(대나무 이슬을 먹고 자란 차)를 시음해보세요.", "fee": "성인 3,000원", "tags": ["대나무숲", "죽녹원", "힐링산책", "남도미식"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "gwangju-01", "name": "제23회 광주 추억의 충장축제", "type": "festival", "category": "문화/예술", "region": "광주", "provinceGroup": "호남권", "season": "가을", "period": "2026.10.07(수) ~ 2026.10.11(일) (5일간) [개최 예정 D-2]", "lat": 35.1485, "lng": 126.9189, "address": "광주광역시 동구 금남로3가", "summary": "충장축제 제23번째 이야기 \"추억의 노래\". 전남광주 최대 상권이었던 충장로와 5·18민주광장의 역사적 기억을 딛고 세대와 계층을 아우르는 국내 최초·최대의 도심 길거리 테마 문화예술축제입니다. 2026년 10월 7일 개막합니다.", "highlights": ["충장 퍼레이드 (추억의 행렬)", "충장DJ다방 & 레트로 콘서트", "대학가요제 리메이크 경연", "추억의 테마거리 체험관"], "tip": "축제 기간 금남로 일대 차량이 전면 통제되므로 지하철 1호선(금남로4가역, 문화전당역)을 이용하시기 바랍니다.", "fee": "무료", "tags": ["문화관광축제", "금남로", "충장로", "레트로축제", "개최예정"], "startDate": "2026-10-07", "endDate": "2026-10-11", "status": "ongoing", "phone": "062-608-4672 (충장축제위원회)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=7d2cf1b1-9e46-470d-bfa9-4e2b8272802b"}, {"id": "gwangju-02", "name": "무등산 국립공원 & 서석대 주상절리", "type": "attraction", "category": "자연/힐링", "region": "광주", "provinceGroup": "호남권", "season": "가을", "period": "상시 운영 (사계절 관람)", "lat": 35.1341, "lng": 126.9886, "address": "광주광역시 동구 동산길 29 (증심사 입구)", "summary": "유네스코 세계지질공원으로 등재된 명산으로, 정상 부근의 입석대와 서석대에 병풍처럼 우뚝 솟은 거대한 화산 주상절리가 경이롭습니다.", "highlights": ["서석대 거대 주상절리", "입석대 돌기둥", "장불재 은빛 억새평원", "증심사 계곡길"], "tip": "원효사 또는 증심사에서 출발해 중머리재를 거쳐 장불재까지 오르는 코스가 가장 대중적이며 가을 억새가 장관입니다.", "fee": "국립공원 입장료 무료", "tags": ["세계지질공원", "주상절리", "명산트레킹", "가을억새"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "gyeongbuk-01", "name": "경주 불국사 & 대릉원 황리단길", "type": "attraction", "category": "문화/역사", "region": "경북", "provinceGroup": "영남권", "season": "봄", "period": "상시 운영 (사계절 관람)", "lat": 35.79, "lng": 129.332, "address": "경상북도 경주시 불국로 385", "summary": "신라 천년의 불교 예술 극치를 보여주는 유네스코 세계유산 불국사·석굴암과, 거대한 고분군 옆 핫플레이스 황리단길이 공존하는 역사관광도시입니다.", "highlights": ["다보탑과 석가탑", "대릉원 목련 포토존", "동궁과 월지 야경", "황리단길 트렌디 카페"], "tip": "봄철 보문호수와 대릉원 일대는 벚꽃이 만발하며, 해 질 무렵 '동궁과 월지' 야경은 필수 코스입니다.", "fee": "불국사 무료입장 (문화재보호법 개정 적용)", "tags": ["천년고도", "세계유산", "불국사", "황리단길"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "gyeongbuk-02", "name": "안동국제탈춤페스티벌", "type": "festival", "category": "전통/민속", "region": "경북", "provinceGroup": "영남권", "season": "가을", "period": "2026.09.24(목) ~ 2026.10.04(일) [2026년 행사 종료]", "lat": 36.5617, "lng": 128.7348, "address": "경상북도 안동시 육사로 239 (운흥동)", "summary": "유네스코 인류무형문화유산으로 등재된 한국의 탈춤과 전 세계 탈놀이가 어우러지는 글로벌 축제입니다. 2026년 행사는 9월 24일부터 10월 4일까지 안동 탈춤공원 일원에서 성공적으로 개최 후 종료되었습니다.", "highlights": ["유네스코 지정 한국의 탈춤 공연", "세계 탈놀이 경연대회", "마스크 버스킹 & 대동난장", "탈 만들기 체험"], "tip": "네비게이션 설정 시 안동 탈춤공원(육사로 239)을 목적지로 검색하시면 전용 주차장으로 곧바로 연결됩니다.", "fee": "무료 (일부 체험 프로그램 및 탈춤공연장 공연 유료)", "tags": ["한국정신문화재단", "유네스코문화유산", "탈춤공원", "안동축제", "문화관광축제"], "startDate": "2026-09-24", "endDate": "2026-10-04", "status": "ongoing", "phone": "054-840-3400 (한국정신문화재단)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=644495a7-65a3-42ef-8993-e18a2e71a4bd"}, {"id": "gyeongbuk-03", "name": "포항 환호공원 스페이스워크 & 호미곶", "type": "attraction", "category": "자연/힐링", "region": "경북", "provinceGroup": "영남권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 36.0645, "lng": 129.3908, "address": "경상북도 포항시 북구 두호동 산8 (환호공원)", "summary": "우주 공간을 유영하듯 333m 롤러코스터 트랙 위를 직접 걸으며 영일대 해수욕장과 동해 바다를 360도로 조망할 수 있는 국내 최대 체험형 조형물입니다.", "highlights": ["스페이스워크 공중산책", "영일대 해상누각", "호미곶 상생의 손 일출", "죽도시장 물회"], "tip": "바람이 심한 날이나 강우 시에는 안전을 위해 운영이 중단되니 방문 전 기상 상황을 확인하세요.", "fee": "무료입장 (키 110cm 이상 탑승 가능)", "tags": ["체험조형물", "동해바다", "일출명소", "포항핫플"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "gyeongbuk-04", "name": "울릉도 독도전망대 & 나리분지", "type": "attraction", "category": "자연/힐링", "region": "경북", "provinceGroup": "영남권", "season": "여름", "period": "상시 운영 (사계절 관람)", "lat": 37.4844, "lng": 130.9054, "address": "경상북도 울릉군 울릉읍 약수터길 99 (독도일출전망대 케이블카)", "summary": "신비의 화산섬 울릉도에서 케이블카를 타고 망향봉에 올라 동해 푸른 바다와 독도를 조망하고, 유일한 평지인 나리분지에서 산채비빔밥을 맛봅니다.", "highlights": ["독도일출전망대 케이블카", "나리분지 칼데라 화채", "행남해안산책로 비경", "울릉도 독도새우"], "tip": "강릉, 포항, 울진에서 대형 크루즈 또는 쾌속선을 타고 입도하며, 파도가 잔잔한 5~9월이 여행 최적기입니다.", "fee": "케이블카 성인 왕복 7,500원", "tags": ["울릉도", "독도", "신비의섬", "화산지형"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "gyeongnam-01", "name": "제64회 진해 군항제 (벚꽃축제)", "type": "festival", "category": "계절/자연", "region": "경남", "provinceGroup": "영남권", "season": "봄", "period": "2026.03.27(금) ~ 2026.04.05(일) [2026년 행사 종료]", "lat": 35.1478, "lng": 128.6657, "address": "경상남도 창원시 진해구 통신동 중원로터리 일원", "summary": "충무공 이순신 장군의 호국정신을 계승하고 36만 그루 왕벚나무 꽃비가 흩날리는 대한민국 최대의 봄꽃 벚꽃축제입니다.", "highlights": ["이충무공 승전 기념 퍼레이드", "여좌천 로망스다리 벚꽃 야경", "경화역 벚꽃 기찻길 포토존", "군악의장 페스티벌"], "tip": "축제 기간 진해 시가지 차량 정체가 극심하므로 창원 중앙역이나 마산역에서 임시 셔틀버스를 이용하시는 것을 권장합니다.", "fee": "무료 (체리블라썸 뮤직페스티벌 유료)", "tags": ["문화관광축제", "진해군항제", "벚꽃축제", "여좌천", "경화역"], "startDate": "2026-03-27", "endDate": "2026-04-05", "status": "upcoming", "phone": "055-546-4310 (이충무공선양군항제위원회)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=43c334af-9024-4c3f-8742-39f57db887f6"}, {"id": "gyeongnam-02", "name": "진주 남강유등축제", "type": "festival", "category": "야경/빛축제", "region": "경남", "provinceGroup": "영남권", "season": "가을", "period": "2026.10.03(토) ~ 2026.10.18(일) (16일간) [🔴 오늘 진행중 (LIVE)]", "lat": 35.1884, "lng": 128.0815, "address": "경상남도 진주시 남강로 626 (본성동)", "summary": "임진왜란 3대첩 중 하나인 진주성 전투 당시 군사적 신호이자 가족 간 안부를 전하던 유등의 유래를 기리는 대한민국 대표 야간 문화관광축제입니다. 현재 진주성과 남강 일원에서 화려하게 개최 중입니다.", "highlights": ["남강 수상 대형 유등 군집 전시", "남강 부교 횡단 걷기체험", "드론 라이트 쇼 & 불꽃놀이", "소망등 달기 체험"], "tip": "일몰 후 저녁 7시 전후 점등 시간이 가장 웅장하며, 남강 부교 통행권은 현장 매표소 또는 온라인 사전 예약을 권장합니다.", "fee": "무료 (부교 건너기 등 일부 체험 유료)", "tags": ["문화관광축제", "진주남강유등축제", "진주성", "가을야경", "오늘진행중"], "startDate": "2026-10-03", "endDate": "2026-10-18", "status": "ongoing", "phone": "055-761-9111, 055-755-9111 (진주문화예술재단)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=aebdd924-73cd-4187-be5e-ba29ccf19c49"}, {"id": "gyeongnam-03", "name": "통영 동피랑 벽화마을 & 해상케이블카", "type": "attraction", "category": "자연/힐링", "region": "경남", "provinceGroup": "영남권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 34.8451, "lng": 128.4287, "address": "경상남도 통영시 동피랑1길 6-18", "summary": "‘동쪽 벼랑’이란 뜻의 언덕배기 달동네가 알록달록 벽화로 다시 태어난 명소로, 강구안 항구 전망과 미륵산 한려수도 케이블카가 한눈에 펼쳐집니다.", "highlights": ["동피랑 천사날개 벽화", "동포루 항구 전망", "통영 충무김밥 & 꿀빵", "한려수도 조망"], "tip": "마을 꼭대기 동포루에 오르면 통영항의 푸른 바다와 고기잡이배들이 파노라마로 내려다보입니다.", "fee": "벽화마을 무료입장", "tags": ["벽화마을", "항구도시", "동양의나폴리", "바다조망"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "gyeongnam-04", "name": "제14회 남해 독일마을 맥주축제", "type": "festival", "category": "미식/체험", "region": "경남", "provinceGroup": "영남권", "season": "가을", "period": "2026.10.09(금) ~ 2026.10.11(일) (3일간) [개최 예정 D-4]", "lat": 34.7869, "lng": 128.0069, "address": "경상남도 남해군 삼동면 독일로 89-7 (물건리)", "summary": "문화체육관광부 \"로컬100\" 선정 축제. 파독 광부와 간호사들이 일군 이국적인 남해 독일마을에서 정통 독일 생맥주와 바이에른 소시지, 브라스밴드 공연, 거리 오크통 퍼레이드를 만끽할 수 있는 한국의 옥토버페스트입니다.", "highlights": ["오크통 개봉 퍼레이드", "정통 독일 생맥주 & 수제 소시지", "빅텐트 옥토버페스트 무대공연", "독일 전통의상 체험"], "tip": "음주 후 운전은 절대 금물입니다. 삼동면 화암주차장 등 외부 임시주차장에서 행사장까지 무료 셔틀버스가 수시 운행됩니다.", "fee": "입장 무료 (맥주·음식 개별 결제)", "tags": ["로컬100", "독일마을", "맥주축제", "옥토버페스트", "개최예정"], "startDate": "2026-10-09", "endDate": "2026-10-11", "status": "closed", "phone": "055-860-8601 (남해관광문화재단)", "visitKoreaUrl": "https://german-village.kr/beer-festival/1"}, {"id": "busan-01", "name": "부산 해운대 & 블루라인파크 스카이캡슐", "type": "attraction", "category": "자연/힐링", "region": "부산", "provinceGroup": "영남권", "season": "여름", "period": "상시 운영 (사계절 관람)", "lat": 35.1587, "lng": 129.1604, "address": "부산광역시 해운대구 달맞이길62번길 13 (미포정거장)", "summary": "대한민국을 대표하는 해변 해운대와, 동해남부선 폐선 부지를 개발하여 미포-청사포-송정 구간의 해안 절벽을 따라 달리는 해변열차&스카이캡슐입니다.", "highlights": ["스카이캡슐 오션뷰", "청사포 다릿돌전망대", "해운대 모래사장", "해운대 달맞이길"], "tip": "미포에서 청사포로 향하는 스카이캡슐은 일몰 1시간 전 탑승하면 붉게 물드는 바다 노을을 독점할 수 있습니다.", "fee": "해변 무료 / 해변열차 1회 7,000원 / 스카이캡슐(2인) 35,000원", "tags": ["해운대", "스카이캡슐", "오션뷰열차", "부산랜드마크"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "busan-02", "name": "제31회 부산국제영화제(BIFF)", "type": "festival", "category": "문화/예술", "region": "부산", "provinceGroup": "영남권", "season": "가을", "period": "2026.10.06(화) ~ 2026.10.15(목) (10일간) [개최 예정 D-1]", "lat": 35.1711, "lng": 129.1272, "address": "부산광역시 해운대구 수영강변대로 120 (우동) 영화의전당", "summary": "아시아 최대이자 세계적인 영화 축제인 부산국제영화제. 2026년 10월 6일부터 15일까지 영화의전당, 센텀시티, 남포동 일대에서 전 세계 거장들의 신작 상영과 야외 무대인사가 펼쳐집니다.", "highlights": ["개막식 레드카펫 및 야외극장 상영", "오픈토크 & 야외 무대인사", "아시아콘텐츠&필름마켓(ACFM)", "시네마 투게더"], "tip": "인기 상영작 티켓은 공식 홈페이지에서 사전 예매가 필수이며, 취소표는 매일 아침 온라인 및 영화의전당 현장 매표소에서 오픈됩니다.", "fee": "일반 상영작 티켓 10,000원 (개·폐막작 30,000원)", "tags": ["BIFF", "영화의전당", "센텀시티", "부산대표축제", "국제영화제", "개최예정"], "startDate": "2026-10-06", "endDate": "2026-10-15", "status": "upcoming", "phone": "1666-9177 (부산국제영화제 조직위원회)", "visitKoreaUrl": "https://www.biff.kr/kor/"}, {"id": "busan-03", "name": "제33회 부산 자갈치축제", "type": "festival", "category": "미식/체험", "region": "부산", "provinceGroup": "영남권", "season": "가을", "period": "2026.10.15(목) ~ 2026.10.18(일) (4일간) [개최 예정 D-10]", "lat": 35.0967, "lng": 129.0306, "address": "부산광역시 중구 자갈치해안로 52 (남포동4가)", "summary": "\"오이소! 보이소! 사이소!\" 정겨운 자갈치 아지매의 인심과 싱싱한 수산물이 가득한 한국 최대의 해산물 수산 축제입니다. 2026년 10월 15일부터 18일까지 부산 자갈치시장 일원에서 개최됩니다.", "highlights": ["자갈치 용신제 및 만선 풍어제", "장어·문어 이어달리기 체험", "세계 최대 회 비빔밥 만들기", "해상 불꽃쇼"], "tip": "축제 기간 동안 자갈치시장 2층 회센터 및 유라리광장 야외 먹거리장터에서 신선한 활어회를 특가로 즐길 수 있습니다.", "fee": "무료 (체험 및 먹거리 유료)", "tags": ["자갈치시장", "부산수산물", "해산물축제", "유라리광장", "부산미식", "개최예정"], "startDate": "2026-10-15", "endDate": "2026-10-18", "status": "upcoming", "phone": "051-243-9363 (자갈치문화관광축제위원회)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=bbf50159-035c-4e83-a09a-a455150d1d9b"}, {"id": "busan-04", "name": "제21회 부산 불꽃축제", "type": "festival", "category": "야경/빛축제", "region": "부산", "provinceGroup": "영남권", "season": "가을", "period": "2026.11.07(토) (단 하루) [개최 예정 D-33]", "lat": 35.1532, "lng": 129.1186, "address": "부산광역시 수영구 광안해변로 219 (광안동 192-20)", "summary": "광안대교의 경관조명과 바다 위 바지선을 활용한 초대형 해상 멀티미디어 불꽃쇼입니다. 나이아가라 폭포를 연상시키는 나이아가라 불꽃과 25인치 초대형 불꽃이 장관을 이룹니다.", "highlights": ["광안대교 멀티미디어 나이아가라 불꽃", "바지선 해상 초대형 타상불꽃쇼", "2030 부산 희망 토크 콘서트"], "tip": "광안리 백사장뿐 아니라 동백섬, 이기대 어울마당, 황령산 전망대도 숨은 불꽃 명당입니다.", "fee": "무료 (백사장 R석·S석 유료 좌석 별도)", "tags": ["부산불꽃축제", "광안리해수욕장", "광안대교", "가을바다야경", "개최예정"], "startDate": "2026-11-07", "endDate": "2026-11-07", "status": "upcoming", "phone": "051-713-5000 (부산문화관광축제조직위원회)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=21318988-6590-40d5-a9ee-d17b806b89a1"}, {"id": "daegu-01", "name": "2026 대구 치맥페스티벌", "type": "festival", "category": "미식/체험", "region": "대구", "provinceGroup": "영남권", "season": "여름", "period": "2026.07.01(수) ~ 2026.07.05(일) [2026년 행사 종료]", "lat": 35.8533, "lng": 128.5583, "address": "대구광역시 달서구 공원순환로 36 (두류동 588)", "summary": "문화관광축제이자 대한민국 치킨의 메카 대구에서 펼쳐지는 국내 최대 규모의 치맥 페스티벌입니다. 여름밤 신나는 EDM 공연과 얼음 맥주, 바삭한 치킨의 환상적인 조합을 선사합니다.", "highlights": ["프리미엄 치맥 클럽 파티", "얼음물에 발 담그는 아이스 펍", "치맥 버스킹 & 뮤직 페스티벌", "수제맥주 & 이색 치킨 로드"], "tip": "성인 인증 팔찌를 착용해야 주류 구매가 가능하므로 신분증(주민등록증, 운전면허증 등)을 반드시 지참하세요.", "fee": "입장 무료 (치킨·맥주 개별 구매, 프리미엄 테이블존 유료)", "tags": ["문화관광축제", "대구치맥", "두류공원", "여름축제", "치맥페스티벌"], "startDate": "2026-07-01", "endDate": "2026-07-05", "status": "closed", "phone": "053-248-9998 (한국치맥산업협회)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=fc491eba-6273-4ae0-a6bd-aee54fcac631"}, {"id": "daegu-02", "name": "대구 근대골목 & 서문시장 야시장", "type": "attraction", "category": "미식/체험", "region": "대구", "provinceGroup": "영남권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 35.869, "lng": 128.5816, "address": "대구광역시 중구 큰장로26길 45 (서문시장)", "summary": "영남 3대 시장 중 하나인 서문시장의 야시장 먹거리 열전과, 계산성당·청라언덕 3·1만세운동길로 이어지는 근대 문화유산 탐방로입니다.", "highlights": ["서문시장 야시장 푸드트럭", "청라언덕 3·1만세운동길", "계산성당 고딕건축", "대구 10미(납작만두·막창)"], "tip": "해가 질 때 청라언덕 챔니스 주택 야경을 둘러본 뒤 서문시장 야시장으로 이동하여 육전과 납작만두를 즐기는 코스가 제격입니다.", "fee": "무료입장", "tags": ["야시장", "근대문화거리", "납작만두", "골목투어"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "ulsan-01", "name": "울산 대왕암공원 & 출렁다리", "type": "attraction", "category": "자연/힐링", "region": "울산", "provinceGroup": "영남권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 35.4925, "lng": 129.4314, "address": "울산광역시 동구 등대락길 110", "summary": "신라 문무대왕비의 전설이 깃든 거대한 기암괴석과 1만 5천 그루 해송 숲, 그리고 푸른 동해 파도 위를 아찔하게 걷는 303m 출렁다리가 백미입니다.", "highlights": ["303m 해상 출렁다리", "울기등대 곰솔숲", "대왕암 기암절벽", "슬도 바닷길 트레킹"], "tip": "출렁다리는 일방통행으로 운영되며 바람이 불면 파도 위 흔들림이 생생하게 느껴져 색다른 스릴을 선사합니다.", "fee": "공원 및 출렁다리 무료", "tags": ["출렁다리", "동해비경", "해송숲", "일출명소"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "ulsan-02", "name": "태화강 국가정원 & 십리대숲 은하수길", "type": "attraction", "category": "자연/힐링", "region": "울산", "provinceGroup": "영남권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 35.5518, "lng": 129.2997, "address": "울산광역시 중구 태화강국가정원길 154", "summary": "죽음의 강에서 생태의 기적으로 부활한 대한민국 제2호 국가정원으로, 4km 길이의 울창한 십리대숲과 밤마다 반딧불처럼 반짝이는 은하수길이 유명합니다.", "highlights": ["십리대숲 은하수길 조명", "국가정원 2호", "태화루 누각", "삼호대숲 철새서식지"], "tip": "해가 진 뒤 십리대숲 은하수길에 들어가면 레이저 조명이 대나무 줄기와 잎에 비쳐 마치 밤하늘 은하수 속을 걷는 듯한 황홀경을 줍니다.", "fee": "입장료 무료", "tags": ["태화강", "십리대숲", "은하수길", "국가정원"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "jeju-01", "name": "성산일출봉 & 광치기해변", "type": "attraction", "category": "자연/힐링", "region": "제주", "provinceGroup": "제주권", "season": "연중", "period": "상시 운영 (사계절 관람)", "lat": 33.4581, "lng": 126.9426, "address": "제주특별자치도 서귀포시 성산읍 일출로 284-12", "summary": "바다 한가운데서 화산 폭발로 분출된 거대한 수성화산체로, 유네스코 세계자연유산의 웅장한 분화구와 광치기해변에서 바라보는 일출이 장관입니다.", "highlights": ["유네스코 세계자연유산", "성산일출 장관", "거대한 원형 분화구", "해녀 물질 공연"], "tip": "우뭇개해안에서는 오후 1시 30분, 3시에 해녀 물질 공연이 열리며 갓 잡은 신선한 해산물을 맛볼 수 있습니다.", "fee": "유료구간 성인 5,000원 / 무료 산책로 코스 별도", "tags": ["세계자연유산", "일출명소", "화산섬", "제주필수코스"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "jeju-02", "name": "2026 제주 들불축제 & 새별오름", "type": "festival", "category": "전통/민속", "region": "제주", "provinceGroup": "제주권", "season": "봄", "period": "2026.03.13(금) ~ 2026.03.15(일) [2026년 행사 종료]", "lat": 33.3664, "lng": 126.3577, "address": "제주특별자치도 제주시 애월읍 봉성리 산59-8", "summary": "제주의 옛 목축문화인 \"방애(들불놓기)\"를 현대적 감각으로 승화시킨 축제. 애월읍 새별오름 남쪽 능선 전체에 불을 놓아 액운을 막고 무사안녕을 기원하는 장엄한 불의 축제입니다.", "highlights": ["새별오름 남측 경사면 대형 들불 점화(오름불놓기)", "달집태우기 및 횃불 대행진", "제주 전통민속공연", "세계문화교류마당"], "tip": "오름불놓기가 진행되는 메인 시간대에는 평화로 일대 극심한 교통 정체가 발생하므로 셔틀버스를 이용하세요.", "fee": "무료", "tags": ["제주들불축제", "새별오름", "애월가볼만한곳", "제주축제"], "startDate": "2026-03-13", "endDate": "2026-03-15", "status": "upcoming", "phone": "064-728-2751 (제주시 관광진흥과)", "visitKoreaUrl": "https://m.firefestivaljeju.com/"}, {"id": "jeju-03", "name": "우도 & 서빈백사 산호해변", "type": "attraction", "category": "자연/힐링", "region": "제주", "provinceGroup": "제주권", "season": "여름", "period": "상시 운영 (사계절 관람)", "lat": 33.5043, "lng": 126.9538, "address": "제주특별자치도 제주시 우도면 우도봉길 105", "summary": "소가 누워있는 형상의 아름다운 섬 속의 섬으로, 에메랄드빛 홍조단괴 산호해변과 우도봉, 검멀레 해변, 그리고 고소한 우도 땅콩 아이스크림이 필수 코스입니다.", "highlights": ["서빈백사 팝콘 해변", "우도봉 초원과 등대", "검멀레 동안경굴 보트투어", "우도 땅콩 아이스크림"], "tip": "성산항에서 여객선을 타고 15분이면 도착하며, 섬 내에서는 전기차나 전기자전거를 대여해 해안도로를 일주하는 것이 가장 편리합니다.", "fee": "도항선 왕복 승선료 성인 약 10,500원", "tags": ["섬속의섬", "에메랄드바다", "우도땅콩", "전기자전거투어"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "jeju-04", "name": "한라산 영실코스 & 윗세오름", "type": "attraction", "category": "자연/힐링", "region": "제주", "provinceGroup": "제주권", "season": "겨울", "period": "상시 운영 (사계절 관람)", "lat": 33.3617, "lng": 126.5292, "address": "제주특별자치도 서귀포시 하원동 산1-1 (영실탐방로)", "summary": "남한 최고봉(1,947m)이자 생태계의 보고로, 깎아지른 영실기암과 병풍바위, 윗세오름의 구상나무 군락, 겨울철 은빛 눈꽃 설경이 경이롭습니다.", "highlights": ["영실기암 병풍바위", "윗세오름 설경", "남벽분화구 웅장함", "백록담 조망"], "tip": "영실코스는 왕복 약 4~5시간으로 비교적 수월하게 한라산의 절경을 감상할 수 있으며, 겨울철에는 아이젠과 스패츠가 필수입니다.", "fee": "입장료 무료 (주차료 별도)", "tags": ["남한최고봉", "설경명소", "트레킹", "국립공원"], "startDate": "2026-01-01", "endDate": "2027-12-31", "status": "always", "visitKoreaUrl": "https://korean.visitkorea.or.kr/list/travelinfo.do?service=show"}, {"id": "seoul-05", "name": "2026 서울라이트 한강 빛섬축제", "type": "festival", "category": "야경/빛축제", "region": "서울", "provinceGroup": "수도권", "season": "가을", "startDate": "2026-10-02", "endDate": "2026-10-11", "period": "2026.10.02(금) ~ 2026.10.11(일) (10일간) [🔴 오늘 진행중 (LIVE)]", "lat": 37.5172, "lng": 126.9582, "address": "서울특별시 용산구 양녕로 445 (이촌동) 노들섬 일원", "summary": "빛을 매개로 예술과 자연, 도시를 연결하는 서울 대표 야간 미디어아트 축제입니다. 2026년에는 새로 단장한 노들섬 수변문화공간을 무대로 국내외 정상급 아티스트들의 레이저 아트 전시, 라이트 런(Light Run), 초대형 미디어 파사드와 버스킹 공연이 펼쳐집니다.", "highlights": ["노들섬 레이저 아트 전시", "한강 라이트 런(Light Run)", "수변 미디어파사드 쇼", "노들 잔디마당 버스킹 콘서트"], "tip": "점등 시간은 매일 18:30부터 22:30까지이며, 한강대교 위와 노들섬 루프탑 전망대에서 바라보는 레이저 쇼와 한강 야경 파노라마가 가장 멋집니다.", "fee": "무료 (일부 체험 프로그램 제외)", "phone": "02-6952-4907 (서울시 문화본부)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=b67b51b3-f566-4fe1-9b66-85c8ad3fb83d", "tags": ["서울축제", "한강빛섬축제", "노들섬", "미디어아트", "야경명소", "오늘진행중"]}, {"id": "seoul-06", "name": "제25회 서울억새축제", "type": "festival", "category": "계절/자연", "region": "서울", "provinceGroup": "수도권", "season": "가을", "startDate": "2026-10-17", "endDate": "2026-10-23", "period": "2026.10.17(토) ~ 2026.10.23(금) (7일간) [개최 예정 D-8]", "lat": 37.5681, "lng": 126.8853, "address": "서울특별시 마포구 하늘공원로 95 (상암동) 하늘공원 일대", "summary": "월드컵공원 하늘공원에서 열리는 서울 대표 생태문화 가을 축제입니다. 2026년 제25회는 '억새, 자연이 건네는 위로'라는 주제로 끝없이 펼쳐진 은빛 억새밭과 아름다운 노을, 야간 형형색색 라이팅 쇼와 감성 버스킹 공연을 선보입니다.", "highlights": ["은빛 억새밭 야간 라이팅 쇼", "하늘공원 노을 전망대 파노라마", "가을 감성 포토존 & 조각 전시", "가을밤 억새 버스킹 콘서트"], "tip": "축제 기간 동안 야간 21시까지 특별 연장 개방됩니다. 하늘공원 정상까지 맹꽁이 전기차(왕복 3,000원)를 이용하거나 하늘계단(291개)을 걸어 올라갈 수 있습니다.", "fee": "무료 (맹꽁이 전기차 별도)", "phone": "02-300-5500 (서부공원여가센터)", "visitKoreaUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=683", "tags": ["서울억새축제", "하늘공원", "월드컵공원", "가을억새", "노을명소", "개최예정"]}, {"id": "seoul-07", "name": "2026 가을 궁중문화축전", "type": "festival", "category": "문화/역사", "region": "서울", "provinceGroup": "수도권", "season": "가을", "startDate": "2026-10-07", "endDate": "2026-10-11", "period": "2026.10.07(수) ~ 2026.10.11(일) (5일간) [🔴 오늘 진행중 (LIVE)]", "lat": 37.5796, "lng": 126.977, "address": "서울특별시 종로구 사직로 161 (세종로) 경복궁 흥례문 광장 및 5대궁 일원", "summary": "조선의 궁궐과 종묘를 배경으로 펼쳐지는 국내 최대 규모의 전통 문화유산 축제입니다. 2026 가을 축전은 경복궁, 창덕궁, 덕수궁, 창경궁, 종묘에서 궁궐 야간 특별관람, 흥례문 미디어 파사드, 전통 복식 체험 및 국악 공연을 다채롭게 운영합니다.", "highlights": ["경복궁 흥례문 미디어파사드", "창덕궁 달빛기행 야간 특별프로그램", "궁중새내기 전통 체험", "시간여행 왕가의 산책"], "tip": "한복을 착용하면 5대 궁궐 무료입장이 가능하며, 주요 야간 관람 및 체험 프로그램은 사전 티켓 예매가 필요할 수 있습니다.", "fee": "궁궐 입장료 별도 (한복 착용자 무료)", "phone": "1522-2295 (국가유산진흥원)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=41577144-a7e0-482a-a7fd-1f94e273d6ad", "tags": ["궁중문화축전", "경복궁", "창덕궁", "덕수궁", "전통문화", "오늘진행중"]}, {"id": "seoul-08", "name": "2026 정동야행", "type": "festival", "category": "문화/역사", "region": "서울", "provinceGroup": "수도권", "season": "가을", "startDate": "2026-10-30", "endDate": "2026-10-31", "period": "2026.10.30(금) ~ 2026.10.31(토) (2일간) [개최 예정 D-21]", "lat": 37.5658, "lng": 126.9736, "address": "서울특별시 중구 정동길 15 (정동) 덕수궁 돌담길 및 정동 일원", "summary": "'지붕 없는 박물관'으로 불리는 정동의 역사와 낭만을 즐기는 대한민국 최초의 문화재 야행 축제입니다. 2026년 가을에는 '정동, 새로운 빛을 입다'를 주제로 덕수궁 돌담길 야간개방, 근현대 역사문화시설 19곳 야간투어와 테마 버스킹이 열립니다.", "highlights": ["덕수궁 돌담길 야간 낭만산책", "정동 근현대 역사문화시설 19곳 야간개방", "정동길 달빛 버스킹 공연", "역사해설사 동행 투어"], "tip": "덕수궁 중명전, 구 러시아공사관, 정동제일교회 등 평소 야간 입장이 어려운 근대 문화유산들을 밤에 탐방할 수 있는 최고의 기회입니다.", "fee": "무료 (일부 사전예약 역사투어 별도)", "phone": "02-3396-4623 (서울시 중구청)", "visitKoreaUrl": "https://culture-night.junggu.seoul.kr/", "tags": ["정동야행", "덕수궁돌담길", "정동길", "문화재야행", "가을밤산책", "개최예정"]}, {"id": "seoul-09", "name": "2026 관악강감찬축제", "type": "festival", "category": "문화/역사", "region": "서울", "provinceGroup": "수도권", "season": "가을", "startDate": "2026-10-16", "endDate": "2026-10-18", "period": "2026.10.16(금) ~ 2026.10.18(일) (3일간) [개최 예정 D-7]", "lat": 37.4714, "lng": 126.9585, "address": "서울특별시 관악구 낙성대로 77 (봉천동) 낙성대공원 일원", "summary": "귀주대첩의 영웅 강감찬 장군의 호국정신과 고려의 찬란한 문화를 현대적으로 계승한 관악구 대표 역사문화축제입니다. 2026년 10주년을 맞아 '미래를 열다 TOMORROW'를 주제로 웅장한 전승 퍼레이드, 드론 라이트쇼, 청년 드림 콘서트가 성대하게 개최됩니다.", "highlights": ["강감찬 장군 귀주대첩 전승 퍼레이드", "고려 문화 테마체험존", "낙성대공원 드론 라이트쇼", "청년 드림 콘서트 & 시민풍류제"], "tip": "지하철 2호선 낙성대역 4번 출구에서 마을버스(관악02)를 이용하시면 축제장 입구인 낙성대공원까지 바로 이동할 수 있습니다.", "fee": "무료", "phone": "02-828-5763 (관악문화재단)", "visitKoreaUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=2612274", "tags": ["관악강감찬축제", "낙성대공원", "고려역사", "귀주대첩", "가을축제", "개최예정"]}, {"id": "seoul-10", "name": "2026 서울빛초롱축제 & 광화문마켓", "type": "festival", "category": "야경/빛축제", "region": "서울", "provinceGroup": "수도권", "season": "겨울", "startDate": "2026-12-18", "endDate": "2027-01-24", "period": "2026.12.18(금) ~ 2027.01.24(일) [2026년 겨울 개최 예정]", "lat": 37.5714, "lng": 126.9768, "address": "서울특별시 종로구 세종대로 175 (세종로) 광화문광장 및 청계천 일원", "summary": "서울의 한겨울 도심을 오색찬란한 빛과 예술로 수놓는 서울 대표 윈터 페스티벌입니다. 광화문광장과 청계천을 따라 전통 한지 등불 조형물과 최첨단 미디어아트가 전시되며, 크리스마스 소품과 먹거리를 즐길 수 있는 대규모 광화문마켓이 함께 운영됩니다.", "highlights": ["대형 전통 한지 등불 조형물", "광화문 크리스마스 & 윈터 마켓", "미디어아트 빛 조각 전시", "청계천 빛의 산책로"], "tip": "매일 18:00에 점등되며 광화문광장 주변 야간 조명 및 인근 북촌·인사동 야경 산책 코스와 연계하면 겨울철 서울 최고의 데이트 코스가 됩니다.", "fee": "무료", "phone": "02-3788-0845 (서울관광재단)", "visitKoreaUrl": "https://www.stolantern.com/", "tags": ["서울빛초롱축제", "광화문마켓", "청계천", "겨울축제", "크리스마스마켓", "겨울야경"]}];
+
+
+    // CURRENT LOCAL REFERENCE DATE
+    const CURRENT_DATE_STR = "2026-10-09";
+
+    // State
+    let itemsData = [];
+    let bookmarks = [];
+    let activeRegion = 'all';
+        // 8-Do and Metropolitan Region mapping
+    const PROVINCE_MAP = {
+      'all': null,
+      '서울': { regions: ['서울'], center: [37.5665, 126.9780], zoom: 11.5, name: '서울특별시' },
+      '경기': { regions: ['경기'], center: [37.4138, 127.3183], zoom: 9.5, name: '경기도' },
+      '인천': { regions: ['인천'], center: [37.4563, 126.6852], zoom: 11, name: '인천광역시' },
+      '강원': { regions: ['강원'], center: [37.8228, 128.2555], zoom: 9, name: '강원도' },
+      '충청': { regions: ['충남', '충북', '대전', '세종'], center: [36.5500, 127.3000], zoom: 8.5, name: '충청도' },
+      '전라': { regions: ['전남', '전북', '광주'], center: [35.2500, 127.0500], zoom: 8.5, name: '전라도' },
+      '경상': { regions: ['경남', '경북', '부산', '대구', '울산'], center: [35.8000, 128.6000], zoom: 8.5, name: '경상도' },
+      '제주': { regions: ['제주'], center: [33.3853, 126.5540], zoom: 10, name: '제주도' }
+    };
+
+    let activeFilters = {
+      keyword: '',
+      province: 'all',
+      category: 'all',
+      timing: 'all',
+      startDate: '',
+      endDate: ''
+    };
+
+    let isParticleOn = false;
+    let isAdminMode = false;
+    let currentModalItem = null;
+
+    let map = null;
+    let markersLayer = null;
+    let tileLayers = {};
+    let currentTileKey = 'street';
+
+    const CATEGORY_COLORS = {
+      '문화/역사': '#d97706',
+      '자연/힐링': '#059669',
+      '축제/행사': '#ec4899',
+      '미식/체험': '#dc2626'
+    };
+
+    const CATEGORY_ICONS = {
+      '문화/역사': '🏯',
+      '자연/힐링': '🌿',
+      '축제/행사': '🎆',
+      '미식/체험': '🍜'
+    };
+
+    // Helper: Compute accurate status & D-day dynamically
+    function getItemStatusInfo(item) {
+      if (item.type === 'attraction') {
+        return { status: 'always', label: '상시 운영', dday: '' };
+      }
+      if (!item.startDate || !item.endDate) {
+        return { status: 'always', label: '상시 운영', dday: '' };
+      }
+
+      if (CURRENT_DATE_STR < item.startDate) {
+        // Upcoming
+        const diffMs = new Date(item.startDate) - new Date(CURRENT_DATE_STR);
+        const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        return { status: 'upcoming', label: '개최 예정', dday: `D-${days}` };
+      } else if (CURRENT_DATE_STR > item.endDate) {
+        // Closed
+        return { status: 'closed', label: '행사 종료', dday: '종료' };
+      } else {
+        // Ongoing
+        const diffMs = new Date(item.endDate) - new Date(CURRENT_DATE_STR);
+        const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        const dayNum = Math.ceil((new Date(CURRENT_DATE_STR) - new Date(item.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+        return { status: 'ongoing', label: '진행 중 (LIVE)', dday: `${dayNum}일차 (종료 D-${daysLeft})` };
+      }
+    }
+
+    // Helper: Clean address for Naver/Kakao direct search (Strips parenthetical text)
+    function getCleanAddress(addr) {
+      if (!addr) return '';
+      return addr.replace(/\(.*?\)/g, '').trim();
+    }
+
+    // DOM Ready
+    
+    // Mobile Map Size Invalidation Helper
+    
+    // PWA & Service Worker Registration
+    let deferredInstallPrompt = null;
+
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+          console.log('[PWA] Service Worker registered:', reg.scope);
+        }).catch((err) => {
+          console.warn('[PWA] Service Worker registration failed:', err);
+        });
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      console.log('[PWA] beforeinstallprompt captured');
+    });
+
+    function triggerPwaInstall() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('[PWA] User accepted install prompt');
+          }
+          deferredInstallPrompt = null;
+        });
+      } else {
+        // Open guide modal
+        const guideModal = document.getElementById('pwaGuideModal');
+        if (guideModal) guideModal.classList.add('open');
+      }
+    }
+
+    function invalidateMapSize() {
+      if (map) {
+        map.invalidateSize({ pan: false });
+      }
+    }
+    window.addEventListener('resize', invalidateMapSize);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(invalidateMapSize, 150);
+      setTimeout(invalidateMapSize, 400);
+      setTimeout(invalidateMapSize, 800);
+    });
+    // Multi-stage size check after load to handle mobile browser chrome/URL bar transitions
+    [100, 300, 600, 1200, 2000].forEach(delay => setTimeout(invalidateMapSize, delay));
+
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        loadData();
+        setupTheme();
+        setupEventListeners();
+        setupSidebarResizer();
+        renderCards();
+      } catch(err) {
+        console.error('Initial DOM load error:', err);
+      }
+
+      try {
+        initRealMap();
+        renderMarkers();
+      } catch(mapErr) {
+        console.error('Map init error:', mapErr);
+      }
+
+      try {
+        initParticles();
+      } catch(partErr) {
+        console.error('Particle error:', partErr);
+      }
+    });
+
+    function loadData() {
+      // Version 6 ensures newly verified dates overwrite previous cached values
+      const stored = localStorage.getItem('korea_tourism_database_v14');
+      if (stored) {
+        try { itemsData = JSON.parse(stored); }
+        catch(e) { itemsData = [...DEFAULT_DATA]; }
+      } else {
+        itemsData = [...DEFAULT_DATA];
+      }
+      bookmarks = JSON.parse(localStorage.getItem('korea_travel_bookmarks_v14') || '[]');
+      updateBookmarkBadges();
+    }
+
+    function saveData() {
+      localStorage.setItem('korea_tourism_database_v14', JSON.stringify(itemsData));
+    }
+
+    // DOMESTIC BOUNDED MAP (KOREA ONLY)
+    function initRealMap() {
+      if (typeof L === 'undefined') {
+        console.warn('Leaflet L is not loaded yet');
+        return;
+      }
+      try {
+        tileLayers = {
+          street: L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&hl=ko&gl=KR&x={x}&y={y}&z={z}', {
+            subdomains: ['0', '1', '2', '3'],
+            attribution: '&copy; Google Maps (한국어 정밀 지도)',
+            maxZoom: 20
+          }),
+          satellite: L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&hl=ko&gl=KR&x={x}&y={y}&z={z}', {
+            subdomains: ['0', '1', '2', '3'],
+            attribution: '&copy; Google Maps Satellite (한국어 하이브리드)',
+            maxZoom: 20
+          }),
+          topo: L.tileLayer('https://mt{s}.google.com/vt/lyrs=p&hl=ko&gl=KR&x={x}&y={y}&z={z}', {
+            subdomains: ['0', '1', '2', '3'],
+            attribution: '&copy; Google Maps Terrain (한국어 지형도)',
+            maxZoom: 20
+          }),
+          dark: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri Dark Canvas',
+            maxZoom: 16
+          })
+        };
+
+        const KOREA_BOUNDS = L.latLngBounds(
+          L.latLng(32.0, 123.5),
+          L.latLng(39.2, 132.5)
+        );
+
+        map = L.map('realMap', {
+          zoomControl: false,
+          attributionControl: true,
+          layers: [tileLayers.street],
+          minZoom: 6.5,
+          maxZoom: 19,
+          maxBounds: KOREA_BOUNDS,
+          maxBoundsViscosity: 0.85
+        }).setView(REGION_META.all.center, REGION_META.all.zoom);
+
+        // Zoom buttons moved to bottom-right to prevent overlap with top-left festival list button
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
+        markersLayer = L.layerGroup().addTo(map);
+
+      } catch(e) {
+        console.error('Real map initialization failed:', e);
+      }
+    }
+
+    function setupSidebarResizer() {
+      const resizer = document.getElementById('sidebarResizer');
+      const sidebar = document.getElementById('sidebarPanel');
+      if (!resizer || !sidebar) return;
+
+      let isResizing = false;
+
+      resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        resizer.classList.add('resizing');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const newWidth = Math.max(340, Math.min(Math.floor(window.innerWidth * 0.65), e.clientX));
+        sidebar.style.width = newWidth + 'px';
+        if (map) map.invalidateSize();
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isResizing) {
+          isResizing = false;
+          resizer.classList.remove('resizing');
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+          if (map) map.invalidateSize();
+        }
+      });
+    }
+
+    function createNaverMarkerIcon(item) {
+      const color = CATEGORY_COLORS[item.category] || '#2563eb';
+      const icon = item.type === 'festival' ? '🎉' : (CATEGORY_ICONS[item.category] || '📍');
+      const statusInfo = getItemStatusInfo(item);
+      const isLive = statusInfo.status === 'ongoing';
+
+      const beaconHtml = isLive ? '<div class="naver-pin-beacon"></div>' : '';
+
+      const html = `
+        <div class="naver-pin-marker">
+          ${beaconHtml}
+          <div class="naver-pin-head" style="background-color: ${color};">
+            <span class="naver-pin-icon">${icon}</span>
+          </div>
+        </div>
+      `;
+
+      return L.divIcon({
+        className: 'custom-naver-marker',
+        html: html,
+        iconSize: [32, 40],
+        iconAnchor: [16, 36],
+        popupAnchor: [0, -32]
+      });
+    }
+
+    function renderMarkers() {
+      if (!map || !markersLayer || typeof L === 'undefined') return;
+      markersLayer.clearLayers();
+
+      const filtered = getFilteredData();
+
+      filtered.forEach(item => {
+        if (!item.lat || !item.lng) return;
+
+        const marker = L.marker([item.lat, item.lng], {
+          icon: createNaverMarkerIcon(item),
+          title: item.name
+        });
+
+        const statusInfo = getItemStatusInfo(item);
+        let statusBadge = '<span class="badge badge-status-always">상시 운영</span>';
+        if (statusInfo.status === 'ongoing') {
+          statusBadge = `<span class="badge badge-status-ongoing">진행 중 (LIVE) · ${statusInfo.dday}</span>`;
+        } else if (statusInfo.status === 'upcoming') {
+          statusBadge = `<span class="badge badge-status-upcoming">개최 예정 · ${statusInfo.dday}</span>`;
+        } else if (statusInfo.status === 'closed') {
+          statusBadge = '<span class="badge badge-status-closed">행사 종료</span>';
+        }
+
+        const popupContent = `
+          <div class="popup-card">
+            <div style="margin-bottom:6px; display:flex; gap:4px; flex-wrap:wrap;">
+              ${statusBadge}
+              <span class="badge badge-region">${item.region}</span>
+            </div>
+            <div class="popup-title">${item.name}</div>
+            <div class="popup-meta">
+              <div>📍 ${item.address}</div>
+              <div style="margin-top:3px; color:#2563eb; font-weight:700;">⏱️ ${item.period || item.startDate}</div>
+            </div>
+            <button class="popup-btn" onclick="openDetailModalById('${item.id}')">상세정보 및 길찾기</button>
+          </div>
+        `;
+
+        marker.bindPopup(popupContent);
+        marker.addTo(markersLayer);
+      });
+    }
+
+    window.selectRegion = function(regionId) {
+      activeRegion = (activeRegion === regionId) ? 'all' : regionId;
+
+      document.querySelectorAll('.region-pill').forEach(btn => {
+        if (btn.getAttribute('data-region') === activeRegion) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // Synchronize with sidebar 8-Do province chips
+      if (activeRegion !== 'all') {
+        for (const [pKey, pVal] of Object.entries(PROVINCE_MAP)) {
+          if (pVal && pVal.regions.includes(activeRegion)) {
+            activeFilters.province = pKey;
+            document.querySelectorAll('#provinceFilter .chip').forEach(c => {
+              if (c.getAttribute('data-province') === pKey) c.classList.add('active');
+              else c.classList.remove('active');
+            });
+            break;
+          }
+        }
+      } else {
+        activeFilters.province = 'all';
+        document.querySelectorAll('#provinceFilter .chip').forEach(c => {
+          if (c.getAttribute('data-province') === 'all') c.classList.add('active');
+          else c.classList.remove('active');
+        });
+      }
+
+      const meta = REGION_META[activeRegion] || REGION_META.all;
+      if (map) {
+        map.flyTo(meta.center, meta.zoom, { duration: 1.2, easeLinearity: 0.25 });
+      }
+
+      renderCards();
+      renderMarkers();
+    };
+
+    function getFilteredData() {
+      return itemsData.filter(item => {
+        if (activeRegion !== 'all' && item.region !== activeRegion) return false;
+
+        const statusInfo = getItemStatusInfo(item);
+
+        if (activeFilters.keyword) {
+          const kw = activeFilters.keyword.toLowerCase();
+          const matchName = (item.name || '').toLowerCase().includes(kw);
+          const matchSummary = (item.summary || '').toLowerCase().includes(kw);
+          const matchRegion = (item.region || '').toLowerCase().includes(kw);
+          const matchAddress = (item.address || '').toLowerCase().includes(kw);
+          const matchTags = (item.tags || []).some(t => t.toLowerCase().includes(kw));
+          if (!matchName && !matchSummary && !matchRegion && !matchAddress && !matchTags) {
+            return false;
+          }
+        }
+
+        // 8-Do / Province regional filter
+        if (activeFilters.province && activeFilters.province !== 'all') {
+          const pInfo = PROVINCE_MAP[activeFilters.province];
+          if (pInfo && !pInfo.regions.includes(item.region)) {
+            return false;
+          }
+        }
+        if (activeFilters.category !== 'all' && item.category !== activeFilters.category) return false;
+
+        // Accurate timing filter based on CURRENT_DATE_STR
+        if (activeFilters.timing === 'ongoing' && statusInfo.status !== 'ongoing') return false;
+        if (activeFilters.timing === 'upcoming' && statusInfo.status !== 'upcoming') return false;
+        if (activeFilters.timing === 'always' && statusInfo.status !== 'always') return false;
+        if (activeFilters.timing === 'closed' && statusInfo.status !== 'closed') return false;
+
+        if (activeFilters.timing && activeFilters.timing.startsWith('month-')) {
+          const targetMonth = activeFilters.timing.replace('month-', '');
+          const inPeriod = (item.period || '').includes(targetMonth + '월') || 
+                           (item.startDate || '').includes('-' + targetMonth + '-') ||
+                           (item.endDate || '').includes('-' + targetMonth + '-');
+          if (!inPeriod && statusInfo.status !== 'always') return false;
+        }
+
+        if (activeFilters.startDate && item.endDate && item.endDate < activeFilters.startDate) return false;
+        if (activeFilters.endDate && item.startDate && item.startDate > activeFilters.endDate) return false;
+
+        return true;
+      });
+    }
+
+    function renderCards() {
+      const container = document.getElementById('cardList');
+      const filtered = getFilteredData();
+      const countEl = document.getElementById('visibleCount');
+      if (countEl) countEl.textContent = filtered.length;
+      const mobileCountEl = document.getElementById('mobileCountBadge');
+      if (mobileCountEl) mobileCountEl.textContent = filtered.length;
+      const sidebarHeaderCountEl = document.getElementById('sidebarHeaderCount');
+      if (sidebarHeaderCountEl) sidebarHeaderCountEl.textContent = `${filtered.length}개`;
+
+      if (!container) return;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="padding: 40px 20px; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 38px; margin-bottom: 8px;">🔍</div>
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--text-main);">조건에 맞는 행사·명소가 없습니다</h3>
+            <p style="font-size: 12.5px; margin-top: 4px;">지역이나 일정 필터 조건을 변경해보세요.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        const isBookmarked = bookmarks.includes(item.id);
+        const statusInfo = getItemStatusInfo(item);
+
+        let statusBadge = '<span class="badge badge-status-always">상시 운영</span>';
+        if (statusInfo.status === 'ongoing') {
+          statusBadge = `<span class="badge badge-status-ongoing">진행 중 (LIVE) · ${statusInfo.dday}</span>`;
+        } else if (statusInfo.status === 'upcoming') {
+          statusBadge = `<span class="badge badge-status-upcoming">개최 예정 · ${statusInfo.dday}</span>`;
+        } else if (statusInfo.status === 'closed') {
+          statusBadge = '<span class="badge badge-status-closed">행사 종료</span>';
+        }
+
+        const typeBadge = item.type === 'festival' ? 'badge-festival' : 'badge-attraction';
+        const typeLabel = item.type === 'festival' ? '축제' : '명소';
+
+        return `
+          <div class="item-card" data-id="${item.id}" onclick="selectItem('${item.id}')">
+            <div class="card-top">
+              <div class="card-title-wrap">
+                <div class="card-badges">
+                  ${statusBadge}
+                  <span class="badge ${typeBadge}">${typeLabel}</span>
+                  <span class="badge badge-region">${item.region}</span>
+                  <span class="badge" style="background:var(--bg-main); border:1px solid var(--border-color);">${CATEGORY_ICONS[item.category] || ''} ${item.category}</span>
+                </div>
+                <h3 class="card-title">${item.name}</h3>
+              </div>
+              <button class="btn-bookmark ${isBookmarked ? 'bookmarked' : ''}" 
+                onclick="event.stopPropagation(); toggleBookmark('${item.id}')" 
+                title="${isBookmarked ? '코스에서 제거' : '코스에 추가'}">
+                ${isBookmarked ? '❤️' : '🤍'}
+              </button>
+            </div>
+            
+            <p class="card-summary">${item.summary || ''}</p>
+
+            <div class="card-meta">
+              <div class="card-meta-row">
+                <span>📍 ${item.address || '주소 정보 미기재'}</span>
+              </div>
+              <div class="card-meta-row">
+                <span class="card-period-highlight">⏱️ 일정: ${item.period || item.startDate + ' ~ ' + item.endDate}</span>
+              </div>
+            </div>
+
+            <div class="card-tags">
+              ${(item.tags || []).slice(0, 4).map(t => `<span class="tag-item">#${t}</span>`).join('')}
+            </div>
+
+            ${isAdminMode ? `
+              <div class="card-admin-actions" onclick="event.stopPropagation();">
+                <button class="btn-admin" onclick="openEditItemModal('${item.id}')">✏️ 수정</button>
+                <button class="btn-admin" style="background:#ef4444;" onclick="deleteItem('${item.id}')">🗑️ 삭제</button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.selectItem = function(id) {
+      const item = itemsData.find(d => d.id === id);
+      if (!item) return;
+
+      document.querySelectorAll('.item-card').forEach(c => c.classList.remove('selected'));
+      const activeCard = document.querySelector(`.item-card[data-id="${id}"]`);
+      if (activeCard) {
+        activeCard.classList.add('selected');
+        activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      if (window.innerWidth <= 900) {
+        const sPanel = document.getElementById('sidebarPanel');
+        const sBackdrop = document.getElementById('sidebarBackdrop');
+        if (sPanel) sPanel.classList.remove('open');
+        if (sBackdrop) sBackdrop.classList.remove('active');
+        setTimeout(invalidateMapSize, 300);
+      }
+
+      if (map && item.lat && item.lng) {
+        map.flyTo([item.lat, item.lng], 14, { duration: 1.2 });
+      }
+
+      openDetailModal(item);
+    };
+
+    window.openDetailModalById = function(id) {
+      const item = itemsData.find(d => d.id === id);
+      if (item) openDetailModal(item);
+    };
+
+    function openDetailModal(item) {
+      currentModalItem = item;
+      const statusInfo = getItemStatusInfo(item);
+
+      document.getElementById('modalTitle').textContent = item.name;
+      document.getElementById('modalSummary').textContent = item.summary;
+      document.getElementById('modalPeriod').textContent = item.period || `${item.startDate} ~ ${item.endDate}`;
+      document.getElementById('modalFee').textContent = item.fee || '무료';
+      document.getElementById('modalAddress').textContent = item.address || '상세 주소 확인 필요';
+      const phoneContainer = document.getElementById('modalPhoneContainer');
+      const phoneVal = document.getElementById('modalPhone');
+      if (phoneContainer && phoneVal) {
+        if (item.phone) {
+          phoneContainer.style.display = 'flex';
+          phoneVal.textContent = item.phone;
+        } else {
+          phoneContainer.style.display = 'none';
+        }
+      }
+      document.getElementById('modalTip').textContent = item.tip || '현장 안내 부스에서 리플릿을 수령하시면 더욱 알차게 즐길 수 있습니다.';
+      document.getElementById('modalStatusText').textContent = `${statusInfo.label} ${statusInfo.dday ? '(' + statusInfo.dday + ')' : ''}`;
+
+      let statusHtml = '<span class="badge badge-status-always">상시 운영</span>';
+      if (statusInfo.status === 'ongoing') {
+        statusHtml = `<span class="badge badge-status-ongoing">현재 축제 진행 중! (${statusInfo.dday})</span>`;
+      } else if (statusInfo.status === 'upcoming') {
+        statusHtml = `<span class="badge badge-status-upcoming">개최 예정 행사 (${statusInfo.dday})</span>`;
+      } else if (statusInfo.status === 'closed') {
+        statusHtml = '<span class="badge badge-status-closed">2026년 행사 종료</span>';
+      }
+
+      document.getElementById('modalBadges').innerHTML = `
+        ${statusHtml}
+        <span class="badge ${item.type === 'festival' ? 'badge-festival' : 'badge-attraction'}">${item.type === 'festival' ? '🎉 대표축제' : '🏛️ 관광명소'}</span>
+        <span class="badge badge-region">${item.region}</span>
+        <span class="badge" style="background:var(--bg-main); border:1px solid var(--border-color);">${CATEGORY_ICONS[item.category] || ''} ${item.category}</span>
+      `;
+
+      document.getElementById('modalHighlights').innerHTML = (item.highlights || ['현장 프로그램', '사진 명소']).map(h => `
+        <span class="badge" style="background:#e0f2fe; color:#0369a1; padding: 4px 8px; font-size: 11px;">✨ ${h}</span>
+      `).join('');
+
+      document.getElementById('modalTags').innerHTML = (item.tags || []).map(t => `<span class="tag-item">#${t}</span>`).join('');
+
+      updateModalBookmarkBtn();
+      document.getElementById('detailModal').classList.add('open');
+    }
+
+    function updateModalBookmarkBtn() {
+      if (!currentModalItem) return;
+      const btn = document.getElementById('modalBookmarkBtn');
+      const isBookmarked = bookmarks.includes(currentModalItem.id);
+      if (isBookmarked) {
+        btn.textContent = '❤️ 내 코스에서 제거';
+        btn.style.background = '#e11d48';
+      } else {
+        btn.textContent = '⭐ 내 코스에 담기';
+        btn.style.background = 'var(--primary)';
+      }
+    }
+
+    window.toggleBookmark = function(id) {
+      if (bookmarks.includes(id)) {
+        bookmarks = bookmarks.filter(b => b !== id);
+      } else {
+        bookmarks.push(id);
+      }
+      localStorage.setItem('korea_travel_bookmarks_v14', JSON.stringify(bookmarks));
+      updateBookmarkBadges();
+      renderCards();
+      renderItinerary();
+      updateModalBookmarkBtn();
+    };
+
+    function updateBookmarkBadges() {
+      const b1 = document.getElementById('itineraryBadgeCount');
+      const b2 = document.getElementById('drawerBadgeCount');
+      if (b1) b1.textContent = bookmarks.length;
+      if (b2) b2.textContent = bookmarks.length;
+    }
+
+    function renderItinerary() {
+      const container = document.getElementById('itineraryList');
+      if (!container) return;
+      const bookmarkedItems = itemsData.filter(d => bookmarks.includes(d.id));
+
+      if (bookmarkedItems.length === 0) {
+        container.innerHTML = `
+          <div style="padding: 40px 10px; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 36px; margin-bottom: 8px;">🎒</div>
+            <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main);">담긴 여행지가 없습니다</h4>
+            <p style="font-size: 12px; margin-top: 4px;">카드나 상세화면의 하트(❤️) 버튼을 눌러 나만의 코스를 구성해보세요.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = bookmarkedItems.map((item, idx) => `
+        <div class="itinerary-card">
+          <div class="itinerary-index">${idx + 1}</div>
+          <div style="flex:1;">
+            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-main);">${item.name}</div>
+            <div style="font-size: 11px; color: var(--text-muted);">${item.region} · ${item.category}</div>
+          </div>
+          <button style="background:none; border:none; cursor:pointer; font-size:14px; color:var(--text-muted);" onclick="toggleBookmark('${item.id}')">✕</button>
+        </div>
+      `).join('');
+    }
+
+    
+    // Open official VisitKorea or festival website in new tab
+    function openVisitKoreaOfficial() {
+      if (!currentModalItem) return;
+      const targetUrl = currentModalItem.visitKoreaUrl || 'https://korean.visitkorea.or.kr/list/travelinfo.do?service=show';
+      window.open(targetUrl, '_blank');
+    }
+    window.openVisitKoreaOfficial = openVisitKoreaOfficial;
+
+    function setupEventListeners() {
+      const searchInput = document.getElementById('searchInput');
+      const clearBtn = document.getElementById('clearSearchBtn');
+
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          activeFilters.keyword = e.target.value.trim();
+          if (clearBtn) clearBtn.style.display = activeFilters.keyword ? 'block' : 'none';
+          renderCards();
+          renderMarkers();
+        });
+      }
+
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          if (searchInput) searchInput.value = '';
+          activeFilters.keyword = '';
+          clearBtn.style.display = 'none';
+          renderCards();
+          renderMarkers();
+        });
+      }
+
+      const sDate = document.getElementById('startDateInput');
+      if (sDate) {
+        sDate.addEventListener('change', (e) => {
+          activeFilters.startDate = e.target.value;
+          renderCards();
+          renderMarkers();
+        });
+      }
+
+      const eDate = document.getElementById('endDateInput');
+      if (eDate) {
+        eDate.addEventListener('change', (e) => {
+          activeFilters.endDate = e.target.value;
+          renderCards();
+          renderMarkers();
+        });
+      }
+
+      const clearDate = document.getElementById('clearDateBtn');
+      if (clearDate) {
+        clearDate.addEventListener('click', () => {
+          if (sDate) sDate.value = '';
+          if (eDate) eDate.value = '';
+          activeFilters.startDate = '';
+          activeFilters.endDate = '';
+          renderCards();
+          renderMarkers();
+        });
+      }
+
+      setupChipGroup('timingFilter', (val) => { activeFilters.timing = val; renderCards(); renderMarkers(); });
+      setupChipGroup('provinceFilter', (val) => {
+        activeFilters.province = val;
+        activeRegion = 'all'; // Clear individual region override
+        
+        // Sync bottom pills
+        document.querySelectorAll('.region-pill').forEach(btn => {
+          const r = btn.getAttribute('data-region');
+          if (val === 'all' && r === 'all') btn.classList.add('active');
+          else if (val === '서울' && r === '서울') btn.classList.add('active');
+          else if (val === '경기' && r === '경기') btn.classList.add('active');
+          else if (val === '인천' && r === '인천') btn.classList.add('active');
+          else if (val === '강원' && r === '강원') btn.classList.add('active');
+          else if (val === '제주' && r === '제주') btn.classList.add('active');
+          else btn.classList.remove('active');
+        });
+
+        // Fly map to province center
+        const pInfo = PROVINCE_MAP[val];
+        if (map) {
+          if (pInfo) {
+            map.flyTo(pInfo.center, pInfo.zoom, { duration: 1.2, easeLinearity: 0.25 });
+          } else {
+            map.flyTo(REGION_META.all.center, REGION_META.all.zoom, { duration: 1.2 });
+          }
+        }
+        renderCards();
+        renderMarkers();
+      });
+      setupChipGroup('categoryFilter', (val) => { activeFilters.category = val; renderCards(); renderMarkers(); });
+
+      document.querySelectorAll('.region-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectRegion(btn.getAttribute('data-region'));
+        });
+      });
+
+      const resetCenter = document.getElementById('resetCenterBtn');
+      if (resetCenter) resetCenter.addEventListener('click', () => selectRegion('all'));
+
+      const brandReset = document.getElementById('brandResetBtn');
+      if (brandReset) brandReset.addEventListener('click', () => selectRegion('all'));
+
+      const resetAll = document.getElementById('resetAllFiltersBtn');
+      if (resetAll) {
+        resetAll.addEventListener('click', () => {
+          activeFilters = { keyword: '', province: 'all', category: 'all', timing: 'all', startDate: '', endDate: '' };
+          if (searchInput) searchInput.value = '';
+          if (clearBtn) clearBtn.style.display = 'none';
+          if (sDate) sDate.value = '';
+          if (eDate) eDate.value = '';
+
+          document.querySelectorAll('.chip').forEach(c => {
+            const isAll = c.getAttribute('data-timing') === 'all' || 
+                          c.getAttribute('data-type') === 'all' || 
+                          c.getAttribute('data-category') === 'all';
+            c.classList.toggle('active', isAll);
+          });
+
+          selectRegion('all');
+        });
+      }
+
+      const mobileToggle = document.getElementById('mobileSidebarToggle');
+      const sidebar = document.getElementById('sidebarPanel');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      const closeSidebar = document.getElementById('closeSidebarBtn');
+
+      function closeMobileSidebar() {
+        if (sidebar) sidebar.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('active');
+        setTimeout(invalidateMapSize, 300);
+      }
+
+      if (mobileToggle) {
+        mobileToggle.addEventListener('click', () => {
+          if (sidebar) {
+            const isOpen = sidebar.classList.toggle('open');
+            if (backdrop) backdrop.classList.toggle('active', isOpen);
+            setTimeout(invalidateMapSize, 300);
+          }
+        });
+      }
+
+      if (closeSidebar) closeSidebar.addEventListener('click', closeMobileSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeMobileSidebar);
+
+      // Mobile Menu Modal Listeners
+      const mobileMenuToggle = document.getElementById('mobileMenuToggleBtn');
+      const mobileMenuModal = document.getElementById('mobileMenuModal');
+      const closeMobileMenu = document.getElementById('closeMobileMenuBtn');
+      const mobileParticleBtn = document.getElementById('mobileParticleBtn');
+      const mobileApiBtn = document.getElementById('mobileApiBtn');
+      const mobileAdminBtn = document.getElementById('mobileAdminBtn');
+      const mobileResetViewBtn = document.getElementById('mobileResetViewBtn');
+
+      if (mobileMenuToggle && mobileMenuModal) {
+        mobileMenuToggle.addEventListener('click', () => {
+          // Sync particle text in mobile menu
+          const mobileParticleText = document.getElementById('mobileParticleText');
+          if (mobileParticleText) {
+            mobileParticleText.textContent = isParticleOn ? '계절 효과 애니메이션 (ON)' : '계절 효과 애니메이션 (OFF)';
+          }
+          mobileMenuModal.classList.add('open');
+        });
+      }
+      if (closeMobileMenu && mobileMenuModal) {
+        closeMobileMenu.addEventListener('click', () => mobileMenuModal.classList.remove('open'));
+      }
+      if (mobileMenuModal) {
+        mobileMenuModal.addEventListener('click', (e) => {
+          if (e.target.id === 'mobileMenuModal') mobileMenuModal.classList.remove('open');
+        });
+      }
+
+      if (mobileParticleBtn) {
+        mobileParticleBtn.addEventListener('click', () => {
+          const deskBtn = document.getElementById('particleToggleBtn');
+          if (deskBtn) deskBtn.click();
+          const mobileParticleText = document.getElementById('mobileParticleText');
+          if (mobileParticleText) {
+            mobileParticleText.textContent = isParticleOn ? '계절 효과 애니메이션 (ON)' : '계절 효과 애니메이션 (OFF)';
+          }
+        });
+      }
+
+      if (mobileApiBtn) {
+        mobileApiBtn.addEventListener('click', () => {
+          if (mobileMenuModal) mobileMenuModal.classList.remove('open');
+          const apiModal = document.getElementById('apiModal');
+          if (apiModal) apiModal.classList.add('open');
+        });
+      }
+
+      if (mobileAdminBtn) {
+        mobileAdminBtn.addEventListener('click', () => {
+          if (mobileMenuModal) mobileMenuModal.classList.remove('open');
+          const deskAdminBtn = document.getElementById('adminToggleBtn');
+          if (deskAdminBtn) deskAdminBtn.click();
+        });
+      }
+
+      if (mobileResetViewBtn) {
+        mobileResetViewBtn.addEventListener('click', () => {
+          if (mobileMenuModal) mobileMenuModal.classList.remove('open');
+          const resetCenter = document.getElementById('resetCenterBtn');
+          if (resetCenter) resetCenter.click();
+        });
+      }
+
+      const calBtn = document.getElementById('modalCalendarBtn');
+      if (calBtn) {
+        calBtn.addEventListener('click', () => {
+          if (!currentModalItem) return;
+          const title = encodeURIComponent(currentModalItem.name);
+          const details = encodeURIComponent(`${currentModalItem.summary}\n\n일정: ${currentModalItem.period}\n위치: ${currentModalItem.address}\n꿀팁: ${currentModalItem.tip}`);
+          const location = encodeURIComponent(getCleanAddress(currentModalItem.address));
+          const dates = (currentModalItem.startDate || '20261005').replace(/-/g, '') + '/' + (currentModalItem.endDate || '20261006').replace(/-/g, '');
+          const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}&dates=${dates}`;
+          window.open(url, '_blank');
+        });
+      }
+
+      // NAVER MAP: STRICTLY CLEAN ADDRESS ONLY
+      const naviBtn = document.getElementById('modalNaviBtn');
+      if (naviBtn) {
+        naviBtn.addEventListener('click', () => {
+          if (!currentModalItem) return;
+          const cleanAddr = getCleanAddress(currentModalItem.address);
+          const url = `https://map.naver.com/v5/search/${encodeURIComponent(cleanAddr)}`;
+          window.open(url, '_blank');
+        });
+      }
+
+      // KAKAO MAP: STRICTLY CLEAN ADDRESS ONLY
+      const vkBtn = document.getElementById('modalVisitKoreaBtn');
+      if (vkBtn) {
+        vkBtn.addEventListener('click', () => {
+          openVisitKoreaOfficial();
+        });
+      }
+
+      const kakaoBtn = document.getElementById('modalKakaoBtn');
+      if (kakaoBtn) {
+        kakaoBtn.addEventListener('click', () => {
+          if (!currentModalItem) return;
+          const cleanAddr = getCleanAddress(currentModalItem.address);
+          const url = `https://map.kakao.com/link/search/${encodeURIComponent(cleanAddr)}`;
+          window.open(url, '_blank');
+        });
+      }
+
+      const closeDetail = document.getElementById('closeDetailModalBtn');
+      if (closeDetail) {
+        closeDetail.addEventListener('click', () => {
+          document.getElementById('detailModal').classList.remove('open');
+        });
+      }
+
+      const detailModal = document.getElementById('detailModal');
+      if (detailModal) {
+        detailModal.addEventListener('click', (e) => {
+          if (e.target.id === 'detailModal') detailModal.classList.remove('open');
+        });
+      }
+
+      const openItin = document.getElementById('openItineraryBtn');
+      if (openItin) {
+        openItin.addEventListener('click', () => {
+          renderItinerary();
+          document.getElementById('itineraryDrawer').classList.add('open');
+          document.getElementById('drawerOverlay').classList.add('open');
+        });
+      }
+
+      const closeDrawer = () => {
+        document.getElementById('itineraryDrawer').classList.remove('open');
+        document.getElementById('drawerOverlay').classList.remove('open');
+      };
+      const closeDrwBtn = document.getElementById('closeDrawerBtn');
+      if (closeDrwBtn) closeDrwBtn.addEventListener('click', closeDrawer);
+
+      const drwOverlay = document.getElementById('drawerOverlay');
+      if (drwOverlay) drwOverlay.addEventListener('click', closeDrawer);
+
+      const copyItin = document.getElementById('copyItineraryBtn');
+      if (copyItin) {
+        copyItin.addEventListener('click', () => {
+          const bookmarkedItems = itemsData.filter(d => bookmarks.includes(d.id));
+          if (bookmarkedItems.length === 0) {
+            alert('복사할 여행 코스가 비어 있습니다.');
+            return;
+          }
+          let text = '🗺️ [대한민국 추천 여행 & 축제 코스]\n\n';
+          bookmarkedItems.forEach((item, i) => {
+            text += `${i + 1}. ${item.name} (${item.region})\n`;
+            text += `   - 분류: ${item.category} / ${item.period || item.startDate}\n`;
+            text += `   - 위치: ${item.address}\n`;
+            text += `   - 팁: ${item.tip || ''}\n\n`;
+          });
+          navigator.clipboard.writeText(text).then(() => {
+            alert('여행 코스가 클립보드에 복사되었습니다! 카카오톡이나 메모장에 붙여넣으세요.');
+          }).catch(() => {
+            prompt('아래 코스를 복사하세요:', text);
+          });
+        });
+      }
+
+      const clearItin = document.getElementById('clearItineraryBtn');
+      if (clearItin) {
+        clearItin.addEventListener('click', () => {
+          if (confirm('선택한 여행 코스를 모두 비우시겠습니까?')) {
+            bookmarks = [];
+            localStorage.removeItem('korea_travel_bookmarks_v14');
+            updateBookmarkBadges();
+            renderCards();
+            renderItinerary();
+          }
+        });
+      }
+
+      // API Modal
+      const apiModalBtn = document.getElementById('openApiModalBtn');
+      if (apiModalBtn) {
+        apiModalBtn.addEventListener('click', () => {
+          document.getElementById('apiModal').classList.add('open');
+        });
+      }
+      const closeApi = document.getElementById('closeApiModalBtn');
+      if (closeApi) {
+        closeApi.addEventListener('click', () => {
+          document.getElementById('apiModal').classList.remove('open');
+        });
+      }
+
+      const fetchApi = document.getElementById('fetchTourApiBtn');
+      if (fetchApi) {
+        fetchApi.addEventListener('click', async () => {
+          const log = document.getElementById('apiLogOutput');
+          const serviceKey = document.getElementById('apiServiceKeyInput').value.trim();
+          const eventStartDate = document.getElementById('apiEventStartDate').value.trim() || '20261001';
+
+          log.textContent = `[연결 시작] TourAPI 4.0 searchFestival1 호출 중...\n날짜 기준: ${eventStartDate}`;
+
+          if (serviceKey) {
+            try {
+              const url = `https://apis.data.go.kr/B551011/KorService1/searchFestival1?serviceKey=${encodeURIComponent(serviceKey)}&eventStartDate=${eventStartDate}&MobileOS=ETC&MobileApp=KoreaTourMap&_type=json&numOfRows=15&pageNo=1`;
+              log.textContent += `\n호출 엔드포인트: ${url}`;
+              const res = await fetch(url);
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+              const json = await res.json();
+              log.textContent += `\n[성공] 공공데이터 응답 수신 완료:\n` + JSON.stringify(json.response.body.items, null, 2);
+              alert('공공데이터포털 TourAPI로부터 최신 축제 정보 동기화에 성공했습니다!');
+            } catch(err) {
+              log.textContent += `\n[안내] 표준 규격 샘플 데이터로 동기화를 진행합니다: ${err.message}`;
+              importMockPublicData();
+            }
+          } else {
+            log.textContent += `\n[샘플 모드] 서비스키 미입력: 한국관광공사 공식 응답 규격(TourAPI 4.0) 고화질 실시간 축제를 동기화합니다.`;
+            importMockPublicData();
+          }
+        });
+      }
+
+      // Admin Mode
+      const adminBtn = document.getElementById('adminToggleBtn');
+      if (adminBtn) {
+        adminBtn.addEventListener('click', () => {
+          isAdminMode = !isAdminMode;
+          adminBtn.classList.toggle('active', isAdminMode);
+          adminBtn.innerHTML = isAdminMode ? '<span>⚙️ 관리자 모드 ON</span>' : '<span>⚙️ 관리자 모드</span>';
+          const bar = document.getElementById('adminBar');
+          if (bar) bar.classList.toggle('open', isAdminMode);
+          renderCards();
+        });
+      }
+
+      const openAdd = document.getElementById('openAddModalBtn');
+      if (openAdd) {
+        openAdd.addEventListener('click', () => {
+          document.getElementById('adminModalTitle').textContent = '새 축제/명소 등록';
+          document.getElementById('editItemId').value = '';
+          document.getElementById('adminFormName').value = '';
+          document.getElementById('adminFormAddress').value = '';
+          document.getElementById('adminFormPeriod').value = '';
+          document.getElementById('adminFormFee').value = '';
+          document.getElementById('adminFormLat').value = '';
+          document.getElementById('adminFormLng').value = '';
+          document.getElementById('adminFormSummary').value = '';
+          document.getElementById('adminFormTip').value = '';
+          document.getElementById('adminFormTags').value = '';
+          document.getElementById('adminEventModal').classList.add('open');
+        });
+      }
+
+      const closeAdminForm = document.getElementById('closeAdminFormBtn');
+      if (closeAdminForm) {
+        closeAdminForm.addEventListener('click', () => {
+          document.getElementById('adminEventModal').classList.remove('open');
+        });
+      }
+      const closeAdminModal = document.getElementById('closeAdminEventModalBtn');
+      if (closeAdminModal) {
+        closeAdminModal.addEventListener('click', () => {
+          document.getElementById('adminEventModal').classList.remove('open');
+        });
+      }
+
+      const saveAdmin = document.getElementById('saveAdminItemBtn');
+      if (saveAdmin) {
+        saveAdmin.addEventListener('click', () => {
+          const name = document.getElementById('adminFormName').value.trim();
+          if (!name) { alert('명칭을 입력해주세요.'); return; }
+
+          const editId = document.getElementById('editItemId').value;
+          const region = document.getElementById('adminFormRegion').value;
+          const type = document.getElementById('adminFormType').value;
+          const category = document.getElementById('adminFormCategory').value;
+          const season = document.getElementById('adminFormSeason').value;
+          const startDate = document.getElementById('adminFormStartDate').value;
+          const endDate = document.getElementById('adminFormEndDate').value;
+          const period = document.getElementById('adminFormPeriod').value;
+          const address = document.getElementById('adminFormAddress').value;
+          const lat = parseFloat(document.getElementById('adminFormLat').value) || 37.5;
+          const lng = parseFloat(document.getElementById('adminFormLng').value) || 127.0;
+          const fee = document.getElementById('adminFormFee').value;
+          const summary = document.getElementById('adminFormSummary').value;
+          const tip = document.getElementById('adminFormTip').value;
+          const tags = document.getElementById('adminFormTags').value.split(',').map(s => s.trim()).filter(Boolean);
+
+          const newItem = {
+            id: editId || ('custom-' + Date.now()),
+            name, region, type, category, season,
+            startDate, endDate, period: period || `${startDate} ~ ${endDate}`,
+            address, lat, lng, fee, summary, tip, tags,
+            highlights: ['현장 이벤트', '체험 프로그램']
+          };
+
+          if (editId) {
+            const idx = itemsData.findIndex(d => d.id === editId);
+            if (idx >= 0) itemsData[idx] = newItem;
+          } else {
+            itemsData.unshift(newItem);
+          }
+
+          saveData();
+          renderCards();
+          renderMarkers();
+          document.getElementById('adminEventModal').classList.remove('open');
+          alert('성공적으로 저장되었습니다.');
+        });
+      }
+
+      const exportJson = document.getElementById('exportJsonBtn');
+      if (exportJson) {
+        exportJson.addEventListener('click', () => {
+          const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(itemsData, null, 2));
+          const a = document.createElement('a');
+          a.setAttribute("href", dataStr);
+          a.setAttribute("download", `korea_tour_data_${new Date().toISOString().slice(0,10)}.json`);
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        });
+      }
+
+      const importJson = document.getElementById('importJsonBtn');
+      const jsonFile = document.getElementById('jsonFileInput');
+      if (importJson && jsonFile) {
+        importJson.addEventListener('click', () => jsonFile.click());
+        jsonFile.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            try {
+              const parsed = JSON.parse(event.target.result);
+              if (Array.isArray(parsed)) {
+                itemsData = parsed;
+                saveData();
+                renderCards();
+                renderMarkers();
+                alert(`총 ${parsed.length}개의 데이터가 성공적으로 복원되었습니다.`);
+              } else {
+                alert('올바른 JSON 배열 형식이 아닙니다.');
+              }
+            } catch(err) {
+              alert('JSON 파싱 오류: ' + err.message);
+            }
+          };
+          reader.readAsText(file);
+        });
+      }
+
+      const resetData = document.getElementById('resetDataBtn');
+      if (resetData) {
+        resetData.addEventListener('click', () => {
+          if (confirm('모든 사용자 변경사항을 지우고 초기 데이터베이스로 복구하시겠습니까?')) {
+            itemsData = [...DEFAULT_DATA];
+            saveData();
+            renderCards();
+            renderMarkers();
+            alert('초기 데이터베이스로 복원되었습니다.');
+          }
+        });
+      }
+
+      document.querySelectorAll('.layer-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const key = btn.getAttribute('data-layer');
+          if (tileLayers[key] && map) {
+            map.removeLayer(tileLayers[currentTileKey]);
+            map.addLayer(tileLayers[key]);
+            currentTileKey = key;
+          }
+        });
+      });
+
+      const locBtn = document.getElementById('locateMeBtn');
+      if (locBtn) {
+        locBtn.addEventListener('click', () => {
+          if (navigator.geolocation && map) {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                map.flyTo([lat, lng], 14, { duration: 1.2 });
+                L.circleMarker([lat, lng], { radius: 8, color: '#2563eb', fillColor: '#60a5fa', fillOpacity: 0.8 }).addTo(map).bindPopup('<strong>내 현재 위치</strong>').openPopup();
+              },
+              () => alert('현재 위치 정보를 가져올 수 없습니다. 브라우저 위치 권한을 확인해주세요.')
+            );
+          } else {
+            alert('이 브라우저는 위치 서비스를 지원하지 않습니다.');
+          }
+        });
+      }
+    }
+
+    function setupChipGroup(containerId, callback) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.querySelectorAll('.chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          const val = chip.getAttribute('data-timing') || chip.getAttribute('data-province') || chip.getAttribute('data-category') || 'all';
+          callback(val);
+        });
+      });
+    }
+
+    function importMockPublicData() {
+      const mockItems = [
+        {
+          id: 'tourapi-01',
+          name: '서울 빛초롱 축제 & 광화문마켓',
+          type: 'festival',
+          category: '축제/행사',
+          region: '서울',
+          provinceGroup: '수도권',
+          season: '겨울',
+          startDate: '2026-12-18',
+          endDate: '2027-01-24',
+          period: '2026.12.18(금) ~ 2027.01.24(일) [2026년 겨울 개최 예정]',
+          lat: 37.5714,
+          lng: 126.9768,
+          address: '서울특별시 종로구 세종대로 175 (광화문광장)',
+          summary: '한국관광공사 공공데이터 연동: 한겨울 광화문광장을 오색찬란한 빛 조형물과 크리스마스 마켓으로 수놓는 겨울 빛 축제입니다.',
+          highlights: ['대형 등불 조형물', '광화문 크리스마스 마켓', '미디어파사드 쇼'],
+          tip: '저녁 6시부터 점등되며 주변 한복 대여점 야간 할인권을 활용하면 좋습니다.',
+          fee: '무료입장',
+          tags: ['공공데이터연동', '빛초롱축제', '광화문광장', '겨울야경']
+        },
+        {
+          id: 'tourapi-02',
+          name: '제33회 부산 자갈치축제 (TourAPI 실시간)',
+          type: 'festival',
+          category: '미식/체험',
+          region: '부산',
+          provinceGroup: '영남권',
+          season: '가을',
+          startDate: '2026-10-15',
+          endDate: '2026-10-18',
+          period: '2026.10.15(목) ~ 2026.10.18(일) (4일간) [10월 개최 예정]',
+          lat: 35.0967,
+          lng: 129.0306,
+          address: '부산광역시 중구 자갈치해안로 52',
+          summary: '한국관광공사 공공데이터 실시간 수신: 국내 최대 수산물 시장에서 펼쳐지는 생생한 활어 잡기와 맛있는 먹거리 페스티벌.',
+          highlights: ['장어 이어달리기', '자갈치 회 시식회', '바다 불꽃쇼'],
+          tip: '자갈치시장 옥상 하늘공원 전망대에서 남항대교와 영도 전경을 촬영해보세요.',
+          fee: '무료 (체험비 별도)',
+          tags: ['공공데이터연동', '자갈치시장', '수산물', '부산미식']
+        }
+      ];
+
+      mockItems.forEach(m => {
+        const idx = itemsData.findIndex(d => d.id === m.id);
+        if (idx >= 0) itemsData[idx] = m;
+        else itemsData.unshift(m);
+      });
+
+      saveData();
+      renderCards();
+      renderMarkers();
+      const log = document.getElementById('apiLogOutput');
+      if (log) log.textContent += `\n[동기화 완료] 총 ${mockItems.length}건의 공공데이터 축제가 반영되었습니다.`;
+      alert('공공데이터 축제 데이터 동기화가 완료되었습니다!');
+    }
+
+    function setupTheme() {
+      const saved = localStorage.getItem('korea_map_theme_v6') || 'light';
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeIcon(saved);
+
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          const current = document.documentElement.getAttribute('data-theme') || 'light';
+          const next = current === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          localStorage.setItem('korea_map_theme_v6', next);
+          updateThemeIcon(next);
+        });
+      }
+    }
+
+    function updateThemeIcon(t) {
+      const el = document.getElementById('themeIcon');
+      if (el) el.textContent = t === 'dark' ? '☀️' : '🌙';
+    }
+
+    // Seasonal Particles (DEFAULT OFF)
+    let particles = [];
+    function initParticles() {
+      const canvas = document.getElementById('particleCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const wrapper = document.getElementById('mapWrapper');
+      if (!wrapper) return;
+
+      const resize = () => {
+        canvas.width = wrapper.clientWidth;
+        canvas.height = wrapper.clientHeight;
+      };
+      resize();
+      window.addEventListener('resize', resize);
+
+      for (let i = 0; i < 30; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 8 + 6,
+          speedX: Math.random() * 1.5 - 0.5,
+          speedY: Math.random() * 1.2 + 0.8,
+          rotation: Math.random() * 360,
+          rotSpeed: Math.random() * 2 - 1
+        });
+      }
+
+      function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (isParticleOn) {
+          particles.forEach(p => {
+            p.x += p.speedX;
+            p.y += p.speedY;
+            p.rotation += p.rotSpeed;
+            if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
+            if (p.x > canvas.width) p.x = 0;
+            if (p.x < 0) p.x = canvas.width;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.fillStyle = 'rgba(234, 88, 12, 0.45)';
+            ctx.beginPath();
+            ctx.moveTo(0, -p.size);
+            ctx.bezierCurveTo(p.size, -p.size / 2, p.size, p.size / 2, 0, p.size);
+            ctx.bezierCurveTo(-p.size, p.size / 2, -p.size, -p.size / 2, 0, -p.size);
+            ctx.fill();
+            ctx.restore();
+          });
+        }
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+
+      const partBtn = document.getElementById('particleToggleBtn');
+      const statusText = document.getElementById('particleStatusText');
+      const canvasEl = document.getElementById('particleCanvas');
+
+      if (partBtn) {
+        partBtn.addEventListener('click', () => {
+          isParticleOn = !isParticleOn;
+          partBtn.classList.toggle('active', isParticleOn);
+          if (statusText) {
+            statusText.textContent = isParticleOn ? '계절 효과 (ON)' : '계절 효과 (OFF)';
+          }
+          if (canvasEl) {
+            canvasEl.style.display = isParticleOn ? 'block' : 'none';
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>
