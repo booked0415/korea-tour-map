@@ -91,28 +91,50 @@ def fetch_live_tourapi_festivals(service_key, start_yyyymmdd):
 def fetch_seoul_culture_portal_events(seoul_api_key, today_str):
     """
     Directly query Seoul Culture Portal Open API (culturalEventInfo) for Seoul performances, festivals, and exhibitions.
-    Service: culturalEventInfo (공연/행사/축제/전시)
+    Supports both official API key and sample key via XML & JSON endpoints.
     """
     key = seoul_api_key.strip() if seoul_api_key else "sample"
-    url = f"http://openapi.seoul.go.kr:8088/{key}/json/culturalEventInfo/1/100/"
-    print(f"[*] Calling Seoul Culture Portal Open API: {url.replace(key, '***') if key != 'sample' else url}")
-
+    # If sample key, limit to 5 per Seoul API specification; if real key, fetch 100
+    max_rows = 100 if key != "sample" else 5
+    
+    # 1. Try XML endpoint first (Most stable for Seoul Open Data API)
+    xml_url = f"http://openapi.seoul.go.kr:8088/{key}/xml/culturalEventInfo/1/{max_rows}/"
+    print(f"[*] Calling Seoul Culture Portal Open API: {xml_url.replace(key, '***') if key != 'sample' else xml_url}")
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "KoreaTourMap/1.0"})
+        req = urllib.request.Request(xml_url, headers={"User-Agent": "Mozilla/5.0 (compatible; KoreaTourMap/1.0)"})
         with urllib.request.urlopen(req, timeout=12) as response:
-            if response.status != 200:
-                print(f"[!] Seoul API returned status {response.status}")
-                return []
-            content = response.read().decode("utf-8")
-            res_json = json.loads(content)
-            
-            event_info = res_json.get("culturalEventInfo", {})
-            rows = event_info.get("row", [])
-            print(f"[✓] Retrieved {len(rows)} cultural events directly from Seoul Culture Portal!")
-            return rows
-    except Exception as e:
-        print(f"[!] Seoul Culture Portal API notice: {e}. Moving forward.")
-        return []
+            if response.status == 200:
+                content = response.read().decode("utf-8", errors="replace")
+                root = ET.fromstring(content)
+                rows = []
+                for row_el in root.findall(".//row"):
+                    r_dict = {}
+                    for child in row_el:
+                        r_dict[child.tag] = (child.text or "").strip()
+                    rows.append(r_dict)
+                if rows:
+                    print(f"[✓] Retrieved {len(rows)} cultural events directly from Seoul Culture Portal (XML)!")
+                    return rows
+    except Exception as e_xml:
+        print(f"[!] Seoul API XML notice: {e_xml}. Trying JSON endpoint...")
+
+    # 2. Fallback to JSON endpoint
+    json_url = f"http://openapi.seoul.go.kr:8088/{key}/json/culturalEventInfo/1/{max_rows}/"
+    try:
+        req = urllib.request.Request(json_url, headers={"User-Agent": "Mozilla/5.0 (compatible; KoreaTourMap/1.0)"})
+        with urllib.request.urlopen(req, timeout=12) as response:
+            if response.status == 200:
+                content = response.read().decode("utf-8", errors="replace")
+                res_json = json.loads(content)
+                event_info = res_json.get("culturalEventInfo", {})
+                rows = event_info.get("row", [])
+                if rows:
+                    print(f"[✓] Retrieved {len(rows)} cultural events directly from Seoul Culture Portal (JSON)!")
+                    return rows
+    except Exception as e_json:
+        print(f"[!] Seoul Culture Portal JSON notice: {e_json}. Moving forward.")
+
+    return []
 
 def fetch_google_news_festival_articles():
     """
