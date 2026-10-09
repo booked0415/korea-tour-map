@@ -3,6 +3,11 @@
 """
 Automated Festival Data Updater for Korea Tourism Map
 Runs periodically via GitHub Actions (Every day at 07:00 and 17:00 KST)
+Features:
+- Date recalibration and live D-day status updating
+- TourAPI 4.0 official public data synchronization
+- Google News RSS & Web scraping
+- Gemini AI (Gemini 2.5/1.5) LLM-powered festival intelligence extraction and JSON structuring
 """
 
 import os
@@ -11,6 +16,7 @@ import json
 import datetime
 import urllib.parse
 import urllib.request
+import xml.etree.ElementTree as ET
 
 def parse_area_code(code_str):
     area_map = {
@@ -73,9 +79,147 @@ def fetch_live_tourapi_festivals(service_key, start_yyyymmdd):
         print(f"[!] TourAPI live sync warning: {e}. Falling back to intelligence database.")
         return []
 
+def fetch_google_news_festival_articles():
+    """
+    Search Google News RSS for Korean festival announcements and news.
+    """
+    queries = [
+        "축제 일정 개막",
+        "가을 축제 문화행사 개최",
+        "빛축제 국화축제 불꽃축제"
+    ]
+    collected_articles = []
+    seen_links = set()
+
+    for q in queries:
+        try:
+            url = f"https://news.google.com/rss/search?q={urllib.parse.quote(q)}&hl=ko&gl=KR&ceid=KR:ko"
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                content = resp.read()
+                root = ET.fromstring(content)
+                for item in root.findall('./channel/item')[:10]:
+                    title = item.find('title').text if item.find('title') is not None else ""
+                    desc = item.find('description').text if item.find('description') is not None else ""
+                    link = item.find('link').text if item.find('link') is not None else ""
+                    pub_date = item.find('pubDate').text if item.find('pubDate') is not None else ""
+                    
+                    # Clean HTML tags from description if any
+                    desc_clean = re.sub(r'<[^>]+>', ' ', desc).strip()
+                    
+                    if link and link not in seen_links and title:
+                        seen_links.add(link)
+                        collected_articles.append({
+                            "title": title,
+                            "snippet": desc_clean[:300],
+                            "date": pub_date,
+                            "source_url": link
+                        })
+        except Exception as e:
+            print(f"[!] Warning fetching RSS for query '{q}': {e}")
+            continue
+
+    print(f"[*] Collected {len(collected_articles)} relevant news articles from web search.")
+    return collected_articles
+
+def extract_festivals_with_gemini(api_key, articles, today_str):
+    """
+    Use Gemini AI API to extract structured festival information from unstructured articles.
+    """
+    if not api_key or not articles:
+        return []
+
+    print(f"[*] Calling Gemini AI to analyze {len(articles)} web search articles...")
+    
+    # Take up to 15 most recent articles
+    articles_sample = articles[:15]
+    text_corpus = "\n\n".join([
+        f"기사 제목: {a['title']}\n내용 요약: {a['snippet']}\n링크: {a['source_url']}"
+        for a in articles_sample
+    ])
+
+    prompt = f"""당신은 대한민국 문화 관광 축제 전문 데이터 큐레이터입니다.
+기준일(오늘): {today_str}
+
+아래는 최근 인터넷 뉴스 및 언론 기사에서 수집한 최신 문화/축제/행사 관련 기사들입니다.
+이 기사들을 정밀하게 분석하여, 실제로 열리는(또는 열릴 예정인) '축제/행사' 정보만을 추출하여 아래 JSON 형식 배열로 응답해주세요.
+
+[추출 규칙]
+1. 이미 과거에 종료된 행사는 제외하고, 현재 진행 중이거나 앞으로 개최될 축제만 추출하세요.
+2. 장소(도시, 주소), 대략적인 위도(lat)와 경도(lng)를 대한민국 좌표계(위도 33~38.5, 경도 126~129.5) 내에서 정확히 매핑하세요.
+3. 대한민국 행정구역(region: '서울', '경기', '인천', '강원', '충남', '충북', '대전', '세종', '전남', '전북', '광주', '경남', '경북', '부산', '대구', '울산', '제주' 중 하나)을 지정하세요.
+4. 반드시 순수 JSON 배열만 출력하세요. 마크다운 코드 블록(```json ... ```) 없이 대괄호 [] 로 시작하고 끝나야 합니다.
+
+[JSON 객체 스키마 예시]
+[
+  {{
+    "name": "축제명 (예: 2026 서울 빛초롱 축제)",
+    "region": "서울",
+    "startDate": "YYYY-MM-DD",
+    "endDate": "YYYY-MM-DD",
+    "address": "상세 주소 또는 개최 장소 (예: 서울 종로구 청계천 일원)",
+    "lat": 37.5691,
+    "lng": 126.9786,
+    "summary": "축제에 대한 핵심 소개 (1~2문장)",
+    "highlights": ["핵심 볼거리1", "볼거리2", "볼거리3"],
+    "tip": "방문객을 위한 꿀팁 (주차, 추천 시간대 등)",
+    "fee": "무료 또는 입장료 정보",
+    "sourceUrl": "관련 기사 또는 공식 링크"
+  }}
+]
+
+[수집된 기사 본문]
+{text_corpus}
+"""
+
+    models_to_try = [
+        "gemini-2.5-flash",
+        "gemini-1.5-flash",
+        "gemini-1.5-pro"
+    ]
+
+    for model in models_to_try:
+        api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        payload = {
+            "contents": [{
+                "parts": [{"text": prompt}]
+            }],
+            "generationConfig": {
+                "temperature": 0.2,
+                "maxOutputTokens": 4096
+            }
+        }
+        
+        try:
+            req = urllib.request.Request(
+                api_url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                if resp.status == 200:
+                    resp_data = json.loads(resp.read().decode("utf-8"))
+                    text = resp_data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                    
+                    # Clean markdown code block fences if present
+                    if text.startswith("```"):
+                        text = re.sub(r"^```(?:json)?", "", text)
+                        text = re.sub(r"```$", "", text).strip()
+                    
+                    festivals = json.loads(text)
+                    if isinstance(festivals, list) and len(festivals) > 0:
+                        print(f"[✓] Gemini ({model}) successfully extracted {len(festivals)} festivals from web search!")
+                        return festivals
+        except Exception as e:
+            print(f"[!] Model {model} attempt error: {e}. Trying fallback...")
+            continue
+
+    print("[!] Could not extract festivals via Gemini API. Moving forward.")
+    return []
+
 def main():
     print("="*60)
-    print("🚀 Starting Korea Festival Daily Auto-Update Script")
+    print("🚀 Starting Korea Festival Daily Auto-Update Script (AI Enhanced)")
     print("="*60)
 
     # 1. Calculate current KST date
@@ -116,15 +260,15 @@ def main():
     data = json.loads(m.group(1))
     print(f"[*] Successfully loaded {len(data)} items from database")
 
+    existing_names = {item['name'].replace(" ", "") for item in data}
+    added_total = 0
+
     # 5. Check TourAPI Key if available in GitHub Secrets
     tour_api_key = os.environ.get("TOUR_API_KEY", "").strip()
     if tour_api_key:
         print(f"[*] TOUR_API_KEY secret detected (length {len(tour_api_key)}). Fetching live data...")
         live_items = fetch_live_tourapi_festivals(tour_api_key, start_yyyymmdd)
         
-        # Merge live items into data
-        existing_names = {item['name'].replace(" ", "") for item in data}
-        added_count = 0
         for it in live_items:
             raw_title = it.get("title", "").strip()
             norm_title = raw_title.replace(" ", "")
@@ -167,14 +311,71 @@ def main():
             }
             data.append(new_item)
             existing_names.add(norm_title)
-            added_count += 1
-        
-        if added_count > 0:
-            print(f"[✓] Added {added_count} new festivals directly from TourAPI 4.0!")
-    else:
-        print("[*] No TOUR_API_KEY secret provided. Using built-in verified intelligence engine.")
+            added_total += 1
 
-    # 6. Recalibrate D-days and status for all festivals
+    # 6. Check GEMINI_API_KEY secret and run Web Search + AI Extraction
+    gemini_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if gemini_key:
+        print(f"[*] GEMINI_API_KEY secret detected (length {len(gemini_key)}). Starting AI Web Search...")
+        articles = fetch_google_news_festival_articles()
+        ai_festivals = extract_festivals_with_gemini(gemini_key, articles, today_str)
+        
+        gemini_added = 0
+        for f_item in ai_festivals:
+            name = f_item.get("name", "").strip()
+            norm = name.replace(" ", "")
+            if not name or norm in existing_names:
+                continue
+
+            s_date = f_item.get("startDate", "")
+            e_date = f_item.get("endDate", "")
+            if not s_date or not e_date:
+                continue
+
+            region = f_item.get("region", "전국")
+            prov_group = parse_province_group(region)
+            addr = f_item.get("address", f"{region} 일원")
+            lat = float(f_item.get("lat", 37.5665))
+            lng = float(f_item.get("lng", 126.9780))
+
+            ai_entry = {
+                "id": f"gemini-ai-{len(data)+1}",
+                "name": name,
+                "type": "festival",
+                "category": "축제/행사",
+                "region": region,
+                "provinceGroup": prov_group,
+                "season": "가을",
+                "startDate": s_date,
+                "endDate": e_date,
+                "period": f"{s_date} ~ {e_date}",
+                "lat": lat,
+                "lng": lng,
+                "address": addr,
+                "summary": f_item.get("summary", f"{name} 축제 정보입니다."),
+                "highlights": f_item.get("highlights", ["웹서칭 AI 발굴", "문화 축제", "현장 체험"]),
+                "tip": f_item.get("tip", "행사 세부 일정은 기상 및 주최측 사정에 따라 변동될 수 있습니다."),
+                "fee": f_item.get("fee", "무료/유료 현장 문의"),
+                "phone": "주최 측 문의",
+                "visitKoreaUrl": f_item.get("sourceUrl", "https://korean.visitkorea.or.kr"),
+                "tags": ["AI자동수집", "웹서칭연동", region, "인기축제"]
+            }
+            data.append(ai_entry)
+            existing_names.add(norm)
+            gemini_added += 1
+            added_total += 1
+
+        if gemini_added > 0:
+            print(f"[✓] Added {gemini_added} brand new festivals discovered via Gemini AI Web Search!")
+    else:
+        print("[*] No GEMINI_API_KEY provided. Web search AI extraction skipped.")
+
+    if added_total > 0:
+        print(f"[✓] Total new festival items added to database: {added_total}")
+    else:
+        print("[*] All latest items are up to date.")
+
+    # 7. Recalibrate D-days and status for all festivals
     stats = {"ongoing": 0, "upcoming": 0, "closed": 0, "always": 0}
     for item in data:
         if item.get("type") == "attraction":
@@ -196,7 +397,7 @@ def main():
 
     print(f"[*] Status distribution as of {today_str}: {stats}")
 
-    # 7. Increment cache version to ensure browsers load fresh data
+    # 8. Increment cache version to ensure browsers load fresh data
     cur_v_match = re.search(r'korea_tourism_database_v(\d+)', html)
     if cur_v_match:
         cur_v = int(cur_v_match.group(1))
@@ -205,7 +406,7 @@ def main():
         html = html.replace(f'korea_travel_bookmarks_v{cur_v}', f'korea_travel_bookmarks_v{new_v}')
         print(f"[*] Incremented database cache version: v{cur_v} -> v{new_v}")
 
-    # 8. Re-insert updated DEFAULT_DATA into index.html
+    # 9. Re-insert updated DEFAULT_DATA into index.html
     new_json = json.dumps(data, ensure_ascii=False)
     html = html[:m.start(1)] + new_json + html[m.end(1):]
 
