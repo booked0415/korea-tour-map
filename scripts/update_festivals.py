@@ -88,6 +88,32 @@ def fetch_live_tourapi_festivals(service_key, start_yyyymmdd):
         print(f"[!] TourAPI live sync warning: {e}. Falling back to intelligence database.")
         return []
 
+def fetch_seoul_culture_portal_events(seoul_api_key, today_str):
+    """
+    Directly query Seoul Culture Portal Open API (culturalEventInfo) for Seoul performances, festivals, and exhibitions.
+    Service: culturalEventInfo (공연/행사/축제/전시)
+    """
+    key = seoul_api_key.strip() if seoul_api_key else "sample"
+    url = f"http://openapi.seoul.go.kr:8088/{key}/json/culturalEventInfo/1/100/"
+    print(f"[*] Calling Seoul Culture Portal Open API: {url.replace(key, '***') if key != 'sample' else url}")
+
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "KoreaTourMap/1.0"})
+        with urllib.request.urlopen(req, timeout=12) as response:
+            if response.status != 200:
+                print(f"[!] Seoul API returned status {response.status}")
+                return []
+            content = response.read().decode("utf-8")
+            res_json = json.loads(content)
+            
+            event_info = res_json.get("culturalEventInfo", {})
+            rows = event_info.get("row", [])
+            print(f"[✓] Retrieved {len(rows)} cultural events directly from Seoul Culture Portal!")
+            return rows
+    except Exception as e:
+        print(f"[!] Seoul Culture Portal API notice: {e}. Moving forward.")
+        return []
+
 def fetch_google_news_festival_articles():
     """
     Search Google News RSS for Korean festival announcements and news across all major regions.
@@ -374,6 +400,80 @@ def main():
             if len(core_t) >= 3:
                 existing_cores.add(core_t)
             added_total += 1
+
+    # 5-1. Seoul Culture Portal Direct Integration (공연, 전시, 축제, 야간문화행사)
+    seoul_api_key = os.environ.get("SEOUL_API_KEY", "").strip()
+    seoul_events = fetch_seoul_culture_portal_events(seoul_api_key, today_str)
+    seoul_added = 0
+    for se in seoul_events:
+        title = se.get("TITLE", "").strip()
+        if not title:
+            continue
+        norm_t = title.replace(" ", "")
+        core_t = normalize_festival_core_name(title)
+        if norm_t in existing_names or (len(core_t) >= 3 and core_t in existing_cores):
+            continue
+
+        # Extract dates
+        s_date = se.get("STRTDATE", "")[:10]
+        e_date = se.get("END_DATE", "")[:10]
+        if not s_date or not e_date:
+            continue
+
+        # Filter: only current or upcoming events
+        if e_date < today_str:
+            continue
+
+        place = se.get("PLACE", "").strip() or "서울 시내 공연장/야외무대"
+        guname = se.get("GUNAME", "").strip()
+        full_addr = f"서울특별시 {guname} {place}".strip()
+        
+        lat = float(se["LOT"]) if se.get("LOT") and se.get("LOT").replace(".", "").isdigit() else 37.5665
+        lng = float(se["LAT"]) if se.get("LAT") and se.get("LAT").replace(".", "").isdigit() else 126.9780
+        # In Seoul API LOT is sometimes longitude and LAT is latitude, or vice versa
+        if lat > 50 and lng < 40: # swapped
+            lat, lng = lng, lat
+
+        codename = se.get("CODENAME", "축제/행사")
+        cat = "축제/행사" if ("축제" in codename or "행사" in codename) else "문화/역사"
+        is_free = se.get("IS_FREE", "")
+        fee_str = se.get("USE_FEE", "무료" if is_free == "무료" else "유료 (상세 안내 참조)")
+
+        hpage = se.get("ORG_LINK", "").strip() or se.get("HOMEPAGE", "").strip()
+        
+        seoul_item = {
+            "id": f"seoul-culture-{len(data)+1}",
+            "name": title,
+            "type": "festival",
+            "category": cat,
+            "region": "서울",
+            "provinceGroup": "수도권",
+            "season": "가을",
+            "startDate": s_date,
+            "endDate": e_date,
+            "period": f"{s_date} ~ {e_date}",
+            "lat": lat,
+            "lng": lng,
+            "address": full_addr,
+            "summary": f"서울문화포털 공식 등록 {codename}입니다. {place}에서 펼쳐집니다.",
+            "highlights": [codename, place, "서울시 문화행사"],
+            "tip": f"관람 대상: {se.get('USE_TRGT', '시민 누구나')}. 사전 예약 및 세부 프로그램은 안내처를 확인하세요.",
+            "fee": fee_str,
+            "phone": "다산콜센터 02-120",
+            "websiteUrl": hpage if (hpage and not "culture.seoul.go.kr" in hpage) else "",
+            "govUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/list.do",
+            "visitKoreaUrl": hpage or "https://culture.seoul.go.kr",
+            "tags": ["서울문화포털", codename, guname, "서울문화행사", "서울"]
+        }
+        data.append(seoul_item)
+        existing_names.add(norm_t)
+        if len(core_t) >= 3:
+            existing_cores.add(core_t)
+        seoul_added += 1
+        added_total += 1
+
+    if seoul_added > 0:
+        print(f"[✓] Added {seoul_added} Seoul culture portal events into database!")
 
     # 6. Check GEMINI_API_KEY secret and run Web Search + AI Extraction
     gemini_key = os.environ.get("GEMINI_API_KEY", "").strip()

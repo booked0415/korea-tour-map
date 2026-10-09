@@ -2319,7 +2319,7 @@
 
     function loadData() {
       // Version 6 ensures newly verified dates overwrite previous cached values
-      const stored = localStorage.getItem('korea_tourism_database_v39');
+      const stored = localStorage.getItem('korea_tourism_database_v40');
       if (stored) {
         try { itemsData = JSON.parse(stored); }
         catch(e) { itemsData = [...DEFAULT_DATA]; }
@@ -2331,7 +2331,7 @@
     }
 
     function saveData() {
-      localStorage.setItem('korea_tourism_database_v39', JSON.stringify(itemsData));
+      localStorage.setItem('korea_tourism_database_v40', JSON.stringify(itemsData));
     }
 
     // DOMESTIC BOUNDED MAP (KOREA ONLY)
