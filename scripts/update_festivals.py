@@ -250,6 +250,20 @@ OFFICIAL_PORTAL_REGISTRY = {
         "address": "대전광역시 유성구 대덕대로 480 (도룡동 3-1, 엑스포과학공원 한빛탑 물빛광장)",
         "lat": 36.3762, "lng": 127.3848,
         "transitInfo": "대전역 또는 유성온천역에서 606, 705, 911번 버스 탑승 후 엑스포과학공원 하차"
+    },
+    "석조전": {
+        "websiteUrl": "https://www.kh.or.kr/cont/view/fest/month/menu/210?thisPage=1&idx=110623",
+        "govUrl": "https://www.deoksugung.go.kr",
+        "address": "서울특별시 중구 세종대로 99 (덕수궁 석조전 내부 및 테라스)",
+        "lat": 37.5658, "lng": 126.9752,
+        "transitInfo": "지하철 1·2호선 시청역 1, 2, 12번 출구 (도보 3분)"
+    },
+    "별빛야행": {
+        "websiteUrl": "https://www.kh.or.kr/cont/view/fest/month/menu/210?thisPage=1&idx=110624",
+        "govUrl": "https://www.royalpalace.go.kr",
+        "address": "서울특별시 종로구 사직로 161 (경복궁 소주방 및 북측 전각)",
+        "lat": 37.5818, "lng": 126.9778,
+        "transitInfo": "지하철 3호선 경복궁역 5번 출구 (도보 1분)"
     }
 }
 
@@ -281,20 +295,6 @@ SEOUL_DISTRICT_COORDS = {
     "강남구": (37.5172, 127.0473),
     "송파구": (37.5145, 127.1060),
     "강동구": (37.5301, 127.1238)
-    "석조전": {
-        "websiteUrl": "https://www.kh.or.kr/cont/view/fest/month/menu/210?thisPage=1&idx=110623",
-        "govUrl": "https://www.deoksugung.go.kr",
-        "address": "서울특별시 중구 세종대로 99 (덕수궁 석조전 내부 및 테라스)",
-        "lat": 37.5658, "lng": 126.9752,
-        "transitInfo": "지하철 1·2호선 시청역 1, 2, 12번 출구 (도보 3분)"
-    },
-    "별빛야행": {
-        "websiteUrl": "https://www.kh.or.kr/cont/view/fest/month/menu/210?thisPage=1&idx=110624",
-        "govUrl": "https://www.royalpalace.go.kr",
-        "address": "서울특별시 종로구 사직로 161 (경복궁 소주방 및 북측 전각)",
-        "lat": 37.5818, "lng": 126.9778,
-        "transitInfo": "지하철 3호선 경복궁역 5번 출구 (도보 1분)"
-    },
 }
 
 def auto_calibrate_festival_metadata(item):

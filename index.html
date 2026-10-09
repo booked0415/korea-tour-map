@@ -2527,12 +2527,12 @@
       // Clean up any stale legacy cached database versions from localStorage
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && k.startsWith('korea_tourism_database_') && k !== 'korea_tourism_database_v90') {
+        if (k && k.startsWith('korea_tourism_database_') && k !== 'korea_tourism_database_v91') {
           localStorage.removeItem(k);
         }
       }
 
-      const stored = localStorage.getItem('korea_tourism_database_v90');
+      const stored = localStorage.getItem('korea_tourism_database_v91');
       if (stored) {
         try { itemsData = JSON.parse(stored); }
         catch(e) { itemsData = [...DEFAULT_DATA]; }
@@ -2544,7 +2544,7 @@
     }
 
     function saveData() {
-      localStorage.setItem('korea_tourism_database_v90', JSON.stringify(itemsData));
+      localStorage.setItem('korea_tourism_database_v91', JSON.stringify(itemsData));
     }
 
     // DOMESTIC BOUNDED MAP (KOREA ONLY)
