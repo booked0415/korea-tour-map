@@ -335,6 +335,20 @@ OFFICIAL_PORTAL_REGISTRY = {
         "lat": 37.5498, "lng": 126.9455,
         "transitInfo": "지하철 6호선 대흥역 2번 출구 (도보 5분)"
     },
+    "서로장터": {
+        "websiteUrl": "https://www.instagram.com/p/DeOdBnaE3IT/?img_index=1",
+        "govUrl": "https://parks.seoul.go.kr",
+        "address": "서울특별시 성동구 뚝섬로 273 (성수동1가 685, 서울숲 가족마당 잔디광장)",
+        "lat": 37.5444, "lng": 127.0374,
+        "transitInfo": "수인분당선 서울숲역 3, 4번 출구 (도보 3분)"
+    },
+    "블루밍 사운드": {
+        "websiteUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159648&menuNo=200010&searchDist=&searchCost=&searchField=FESTIVAL&searchAge=&sdate=2026-10-10&edate=2026-10-10&searchStr=&pageIndex=1",
+        "govUrl": "https://www.gdfac.or.kr",
+        "address": "서울특별시 강동구 동남로 870 (명일동 422, 강동아트센터 대극장 및 야외바람마당)",
+        "lat": 37.5495, "lng": 127.1565,
+        "transitInfo": "지하철 5호선 고덕역 4번 출구 (도보 7분)"
+    },
     "별빛야행": {
         "websiteUrl": "https://www.kh.or.kr/cont/view/fest/month/menu/210?thisPage=1&idx=110624",
         "govUrl": "https://www.royalpalace.go.kr",
@@ -382,7 +396,9 @@ def auto_calibrate_festival_metadata(item):
     name = item.get("name", "")
     for keyword, meta in OFFICIAL_PORTAL_REGISTRY.items():
         if keyword in name:
-            if meta.get("websiteUrl") and not item.get("websiteUrl"):
+            if meta.get("websiteUrl"):
+                # Always prioritize verified actionable official event portals / detail pages
+                item["websiteUrl"] = meta["websiteUrl"]
                 item["websiteUrl"] = meta["websiteUrl"]
             elif meta.get("websiteUrl") and ("visitkorea" in item.get("websiteUrl", "").lower() or "seoul.go.kr" in item.get("websiteUrl", "").lower()):
                 # Promote to dedicated festival portal
