@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Automated Festival Data Updater for Korea Tourism Map
-Runs periodically via GitHub Actions (Every day at 07:00 and 17:00 KST)
+Runs periodically via GitHub Actions 4 times daily (Every day at 07:30, 12:30, 17:30, 23:00 KST / 6-hour interval)
 Features:
 - Date recalibration and live D-day status updating
 - TourAPI 4.0 official public data synchronization
@@ -251,6 +251,36 @@ OFFICIAL_PORTAL_REGISTRY = {
         "lat": 36.3762, "lng": 127.3848,
         "transitInfo": "대전역 또는 유성온천역에서 606, 705, 911번 버스 탑승 후 엑스포과학공원 하차"
     }
+}
+
+
+# 25 Autonomous Districts of Seoul Fallback Geocoding Coordinates
+SEOUL_DISTRICT_COORDS = {
+    "종로구": (37.5730, 126.9794),
+    "중구": (37.5638, 126.9976),
+    "용산구": (37.5326, 126.9900),
+    "성동구": (37.5634, 127.0368),
+    "광진구": (37.5385, 127.0823),
+    "동대문구": (37.5744, 127.0397),
+    "중랑구": (37.6065, 127.0927),
+    "성북구": (37.5891, 127.0182),
+    "강북구": (37.6396, 127.0255),
+    "도봉구": (37.6688, 127.0471),
+    "노원구": (37.6542, 127.0568),
+    "은평구": (37.6027, 126.9291),
+    "서대문구": (37.5791, 126.9368),
+    "마포구": (37.5663, 126.9016),
+    "양천구": (37.5169, 126.8665),
+    "강서구": (37.5509, 126.8495),
+    "구로구": (37.4954, 126.8874),
+    "금천구": (37.4568, 126.8955),
+    "영등포구": (37.5264, 126.8962),
+    "동작구": (37.5124, 126.9393),
+    "관악구": (37.4784, 126.9515),
+    "서초구": (37.4837, 127.0324),
+    "강남구": (37.5172, 127.0473),
+    "송파구": (37.5145, 127.1060),
+    "강동구": (37.5301, 127.1238)
 }
 
 def auto_calibrate_festival_metadata(item):
@@ -715,11 +745,28 @@ def main():
         guname = se.get("GUNAME", "").strip()
         full_addr = f"서울특별시 {guname} {place}".strip()
         
-        lat = float(se["LOT"]) if se.get("LOT") and se.get("LOT").replace(".", "").isdigit() else 37.5665
-        lng = float(se["LAT"]) if se.get("LAT") and se.get("LAT").replace(".", "").isdigit() else 126.9780
-        # In Seoul API LOT is sometimes longitude and LAT is latitude, or vice versa
-        if lat > 50 and lng < 40: # swapped
+        # Handle coordinates with autonomous district fallback
+        raw_lot = se.get("LOT", "").strip() # Longitude
+        raw_lat = se.get("LAT", "").strip() # Latitude
+        
+        lat, lng = 0.0, 0.0
+        try:
+            if raw_lat and raw_lot:
+                lat = float(raw_lat)
+                lng = float(raw_lot)
+        except Exception:
+            pass
+
+        # If swapped (LOT was lat, LAT was lng)
+        if lat > 50 and lng < 40:
             lat, lng = lng, lat
+
+        # Fallback to district representative coordinates if out of Seoul bounds
+        if not (37.4 < lat < 37.7 and 126.7 < lng < 127.3):
+            if guname in SEOUL_DISTRICT_COORDS:
+                lat, lng = SEOUL_DISTRICT_COORDS[guname]
+            else:
+                lat, lng = 37.5665, 126.9780
 
         codename = se.get("CODENAME", "축제/행사")
         cat = "축제/행사" if ("축제" in codename or "행사" in codename) else "문화/역사"
