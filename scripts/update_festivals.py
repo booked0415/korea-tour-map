@@ -6,7 +6,7 @@ Runs periodically via GitHub Actions (Every day at 07:00 and 17:00 KST)
 Features:
 - Date recalibration and live D-day status updating
 - TourAPI 4.0 official public data synchronization
-- Google News RSS & Web scraping
+- Google News RSS & Regional Festival Web search (including Incheon, Seoul, Gyeonggi, Busan, etc.)
 - Gemini AI (Gemini 2.5/1.5) LLM-powered festival intelligence extraction and JSON structuring
 """
 
@@ -53,7 +53,7 @@ def fetch_live_tourapi_festivals(service_key, start_yyyymmdd):
         return []
     
     clean_key = urllib.parse.unquote(service_key.strip())
-    url = f"https://apis.data.go.kr/B551011/KorService1/searchFestival1?serviceKey={urllib.parse.quote(clean_key)}&eventStartDate={start_yyyymmdd}&MobileOS=ETC&MobileApp=KoreaTourMap&_type=json&numOfRows=50&pageNo=1"
+    url = f"https://apis.data.go.kr/B551011/KorService1/searchFestival1?serviceKey={urllib.parse.quote(clean_key)}&eventStartDate={start_yyyymmdd}&MobileOS=ETC&MobileApp=KoreaTourMap&_type=json&numOfRows=100&pageNo=1"
     
     print(f"[*] Calling TourAPI 4.0: start date {start_yyyymmdd}")
     try:
@@ -81,12 +81,15 @@ def fetch_live_tourapi_festivals(service_key, start_yyyymmdd):
 
 def fetch_google_news_festival_articles():
     """
-    Search Google News RSS for Korean festival announcements and news.
+    Search Google News RSS for Korean festival announcements and news across all major regions.
     """
     queries = [
-        "축제 일정 개막",
-        "가을 축제 문화행사 개최",
-        "빛축제 국화축제 불꽃축제"
+        "인천 축제 일정 개막",
+        "서울 축제 문화행사 개최",
+        "경기 축제 개막 가을",
+        "부산 대구 광주 축제",
+        "가을 축제 문화행사 개최 일정",
+        "빛축제 국화축제 불꽃축제 야행"
     ]
     collected_articles = []
     seen_links = set()
@@ -98,13 +101,12 @@ def fetch_google_news_festival_articles():
             with urllib.request.urlopen(req, timeout=10) as resp:
                 content = resp.read()
                 root = ET.fromstring(content)
-                for item in root.findall('./channel/item')[:10]:
+                for item in root.findall('./channel/item')[:8]:
                     title = item.find('title').text if item.find('title') is not None else ""
                     desc = item.find('description').text if item.find('description') is not None else ""
                     link = item.find('link').text if item.find('link') is not None else ""
                     pub_date = item.find('pubDate').text if item.find('pubDate') is not None else ""
                     
-                    # Clean HTML tags from description if any
                     desc_clean = re.sub(r'<[^>]+>', ' ', desc).strip()
                     
                     if link and link not in seen_links and title:
@@ -131,8 +133,8 @@ def extract_festivals_with_gemini(api_key, articles, today_str):
 
     print(f"[*] Calling Gemini AI to analyze {len(articles)} web search articles...")
     
-    # Take up to 15 most recent articles
-    articles_sample = articles[:15]
+    # Take up to 25 most recent articles
+    articles_sample = articles[:25]
     text_corpus = "\n\n".join([
         f"기사 제목: {a['title']}\n내용 요약: {a['snippet']}\n링크: {a['source_url']}"
         for a in articles_sample
@@ -141,25 +143,25 @@ def extract_festivals_with_gemini(api_key, articles, today_str):
     prompt = f"""당신은 대한민국 문화 관광 축제 전문 데이터 큐레이터입니다.
 기준일(오늘): {today_str}
 
-아래는 최근 인터넷 뉴스 및 언론 기사에서 수집한 최신 문화/축제/행사 관련 기사들입니다.
+아래는 최근 인터넷 뉴스 및 언론 기사에서 수집한 최신 문화/축제/행사 관련 기사들입니다 (서울, 인천, 경기, 강원, 충청, 영남, 호남, 제주 등 전국 축제 포함).
 이 기사들을 정밀하게 분석하여, 실제로 열리는(또는 열릴 예정인) '축제/행사' 정보만을 추출하여 아래 JSON 형식 배열로 응답해주세요.
 
 [추출 규칙]
 1. 이미 과거에 종료된 행사는 제외하고, 현재 진행 중이거나 앞으로 개최될 축제만 추출하세요.
-2. 장소(도시, 주소), 대략적인 위도(lat)와 경도(lng)를 대한민국 좌표계(위도 33~38.5, 경도 126~129.5) 내에서 정확히 매핑하세요.
-3. 대한민국 행정구역(region: '서울', '경기', '인천', '강원', '충남', '충북', '대전', '세종', '전남', '전북', '광주', '경남', '경북', '부산', '대구', '울산', '제주' 중 하나)을 지정하세요.
+2. 기사에 명시된 지역(인천, 서울, 수원, 부산 등)을 정확한 광역 행정구역(region: '서울', '경기', '인천', '강원', '충남', '충북', '대전', '세종', '전남', '전북', '광주', '경남', '경북', '부산', '대구', '울산', '제주' 중 하나)으로 지정하세요.
+3. 장소(도시, 주소), 대략적인 위도(lat)와 경도(lng)를 대한민국 좌표계(위도 33~38.5, 경도 126~129.5) 내에서 정확히 매핑하세요.
 4. 반드시 순수 JSON 배열만 출력하세요. 마크다운 코드 블록(```json ... ```) 없이 대괄호 [] 로 시작하고 끝나야 합니다.
 
 [JSON 객체 스키마 예시]
 [
   {{
-    "name": "축제명 (예: 2026 서울 빛초롱 축제)",
-    "region": "서울",
+    "name": "축제명 (예: 2026 인천개항장 국가유산야행)",
+    "region": "인천",
     "startDate": "YYYY-MM-DD",
     "endDate": "YYYY-MM-DD",
-    "address": "상세 주소 또는 개최 장소 (예: 서울 종로구 청계천 일원)",
-    "lat": 37.5691,
-    "lng": 126.9786,
+    "address": "상세 주소 또는 개최 장소 (예: 인천 중구 신포로27번길 80)",
+    "lat": 37.4745,
+    "lng": 126.6214,
     "summary": "축제에 대한 핵심 소개 (1~2문장)",
     "highlights": ["핵심 볼거리1", "볼거리2", "볼거리3"],
     "tip": "방문객을 위한 꿀팁 (주차, 추천 시간대 등)",
