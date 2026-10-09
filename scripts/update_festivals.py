@@ -27,6 +27,15 @@ def parse_area_code(code_str):
     }
     return area_map.get(str(code_str), "전국")
 
+def normalize_festival_core_name(name):
+    """
+    Extracts the core festival title to prevent duplicate entries with different edition numbers
+    (e.g., '제12회 남해 독일마을 맥주축제' vs '제14회 남해 독일마을 맥주축제').
+    """
+    s = re.sub(r'[\d회제\(\)·\-\s]', '', name)
+    s = s.replace('축제', '').replace('페스티벌', '').replace('문화', '').replace('오크토버페스트', '')
+    return s
+
 def parse_province_group(region):
     if region in ["서울", "경기", "인천"]:
         return "수도권"
@@ -304,6 +313,7 @@ def main():
     print(f"[*] Successfully loaded {len(data)} items from database")
 
     existing_names = {item['name'].replace(" ", "") for item in data}
+    existing_cores = {normalize_festival_core_name(item['name']) for item in data if len(normalize_festival_core_name(item['name'])) >= 3}
     added_total = 0
 
     # 5. Check TourAPI Key if available in GitHub Secrets
@@ -315,7 +325,8 @@ def main():
         for it in live_items:
             raw_title = it.get("title", "").strip()
             norm_title = raw_title.replace(" ", "")
-            if not raw_title or norm_title in existing_names:
+            core_t = normalize_festival_core_name(raw_title)
+            if not raw_title or norm_title in existing_names or (len(core_t) >= 3 and core_t in existing_cores):
                 continue
             
             s_date = format_date_str(it.get("eventstartdate", ""))
@@ -354,6 +365,8 @@ def main():
             }
             data.append(new_item)
             existing_names.add(norm_title)
+            if len(core_t) >= 3:
+                existing_cores.add(core_t)
             added_total += 1
 
     # 6. Check GEMINI_API_KEY secret and run Web Search + AI Extraction
@@ -367,7 +380,8 @@ def main():
         for f_item in ai_festivals:
             name = f_item.get("name", "").strip()
             norm = name.replace(" ", "")
-            if not name or norm in existing_names:
+            core_t = normalize_festival_core_name(name)
+            if not name or norm in existing_names or (len(core_t) >= 3 and core_t in existing_cores):
                 continue
 
             s_date = f_item.get("startDate", "")
@@ -405,6 +419,8 @@ def main():
             }
             data.append(ai_entry)
             existing_names.add(norm)
+            if len(core_t) >= 3:
+                existing_cores.add(core_t)
             gemini_added += 1
             added_total += 1
 
