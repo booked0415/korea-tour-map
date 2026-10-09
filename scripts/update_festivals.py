@@ -281,6 +281,20 @@ SEOUL_DISTRICT_COORDS = {
     "강남구": (37.5172, 127.0473),
     "송파구": (37.5145, 127.1060),
     "강동구": (37.5301, 127.1238)
+    "석조전": {
+        "websiteUrl": "https://www.kh.or.kr/cont/view/fest/month/menu/210?thisPage=1&idx=110623",
+        "govUrl": "https://www.deoksugung.go.kr",
+        "address": "서울특별시 중구 세종대로 99 (덕수궁 석조전 내부 및 테라스)",
+        "lat": 37.5658, "lng": 126.9752,
+        "transitInfo": "지하철 1·2호선 시청역 1, 2, 12번 출구 (도보 3분)"
+    },
+    "별빛야행": {
+        "websiteUrl": "https://www.kh.or.kr/cont/view/fest/month/menu/210?thisPage=1&idx=110624",
+        "govUrl": "https://www.royalpalace.go.kr",
+        "address": "서울특별시 종로구 사직로 161 (경복궁 소주방 및 북측 전각)",
+        "lat": 37.5818, "lng": 126.9778,
+        "transitInfo": "지하철 3호선 경복궁역 5번 출구 (도보 1분)"
+    },
 }
 
 def auto_calibrate_festival_metadata(item):
@@ -390,7 +404,7 @@ def fetch_seoul_culture_portal_events(seoul_api_key, today_str):
     """
     key = seoul_api_key.strip() if seoul_api_key else "sample"
     # If sample key, limit to 5 per Seoul API specification; if real key, fetch 100
-    max_rows = 100 if key != "sample" else 5
+    max_rows = 1000 if key != "sample" else 5
     
     # 1. Try XML endpoint first (Most stable for Seoul Open Data API)
     xml_url = f"http://openapi.seoul.go.kr:8088/{key}/xml/culturalEventInfo/1/{max_rows}/"
@@ -522,7 +536,7 @@ def extract_festivals_with_gemini(api_key, articles, today_str):
     "highlights": ["핵심 볼거리1", "볼거리2", "볼거리3"],
     "tip": "방문객을 위한 꿀팁 (주차, 추천 시간대 등)",
     "fee": "무료 또는 입장료 정보",
-    "websiteUrl": "1순위: 해당 축제 전용 공식 웹사이트 URL (없으면 빈 문자열)",
+    "websiteUrl": "1순위: 해당 축제 전용 공식 웹사이트 또는 국가유산진흥원/지자체의 고유 상세 예약·안내 페이지 URL(쿼리스트링 포함, 기관 메인 홈 x)",
     "govUrl": "2순위: 지자체(시·군·구청) 또는 문화재단 등 공공기관 공식 안내 페이지 URL (없으면 빈 문자열)",
     "visitKoreaUrl": "3순위: 대한민국 구석구석, 서울문화포털, VisitSeoul 또는 관련 언론 기사 링크 URL"
   }}
