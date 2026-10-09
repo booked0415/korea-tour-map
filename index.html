@@ -1346,9 +1346,7 @@
         <span id="particleIcon">🍁</span> <span id="particleStatusText">계절 효과 (OFF)</span>
       </button>
 
-      <button class="btn-nav desktop-only-btn" id="openApiModalBtn" title="한국관광공사 TourAPI 공공데이터 연동">
-        <span>📡 공공데이터 연동</span>
-      </button>
+
 
       <button class="btn-nav desktop-only-btn" id="adminToggleBtn" title="관리자 등록/편집 모드">
         <span>⚙️ 관리자 모드</span>
@@ -1384,6 +1382,7 @@
     </div>
     <div class="admin-actions">
       <button class="btn-admin" id="openAddModalBtn">➕ 새 축제/명소 등록</button>
+      <button class="btn-admin" id="openApiModalBtn" style="background:#0284c7;">📡 공공데이터 수동 동기화</button>
       <button class="btn-admin" id="exportJsonBtn">💾 JSON 백업 다운로드</button>
       <button class="btn-admin" id="importJsonBtn">📂 JSON 복원 불러오기</button>
       <input type="file" id="jsonFileInput" accept=".json" style="display:none;" />
@@ -1410,6 +1409,7 @@
             <span class="sidebar-title-icon">📋</span>
             <span class="sidebar-title-text">축제·명소 목록</span>
             <span class="sidebar-title-count-badge" id="sidebarHeaderCount">0개</span>
+            <span class="badge" style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; font-size:10.5px; font-weight:700;">🟢 TourAPI 자동 동기화</span>
           </div>
           <button class="btn-close-sidebar" id="closeSidebarBtn" title="목록 닫기">✕</button>
         </div>
@@ -1621,9 +1621,7 @@
         <button class="btn-action" id="mobileParticleBtn" style="justify-content: flex-start; padding: 10px 14px;">
           <span id="mobileParticleIcon">🍁</span> <span id="mobileParticleText">계절 효과 애니메이션 (OFF)</span>
         </button>
-        <button class="btn-action" id="mobileApiBtn" style="justify-content: flex-start; padding: 10px 14px;">
-          <span>📡 한국관광공사 TourAPI 연동</span>
-        </button>
+
         <button class="btn-action" id="mobileAdminBtn" style="justify-content: flex-start; padding: 10px 14px;">
           <span>⚙️ 관리자 등록 / 편집 모드</span>
         </button>
