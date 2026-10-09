@@ -258,6 +258,83 @@ OFFICIAL_PORTAL_REGISTRY = {
         "lat": 37.5658, "lng": 126.9752,
         "transitInfo": "지하철 1·2호선 시청역 1, 2, 12번 출구 (도보 3분)"
     },
+    "블루밍 사운드": {
+        "websiteUrl": "https://www.gdfac.or.kr",
+        "govUrl": "https://culture.seoul.go.kr",
+        "address": "서울특별시 강동구 동남로 870 (명일동 422, 강동아트센터 대극장 및 야외바람마당)",
+        "lat": 37.5495, "lng": 127.1565,
+        "transitInfo": "지하철 5호선 고덕역 4번 출구 (도보 7분)"
+    },
+    "공예 페스타": {
+        "websiteUrl": "https://www.mfac.or.kr",
+        "govUrl": "https://culture.seoul.go.kr",
+        "address": "서울특별시 마포구 대흥로20길 34 (대흥동 251-1, 마포아트센터 갤러리맥)",
+        "lat": 37.5498, "lng": 126.9455,
+        "transitInfo": "지하철 6호선 대흥역 2번 출구 (도보 5분)"
+    },
+    "어슬렁": {
+        "websiteUrl": "https://www.mapo.go.kr",
+        "govUrl": "https://culture.seoul.go.kr",
+        "address": "서울특별시 마포구 와우산로3길 16 (상수동 316-1, 상수동 카페거리)",
+        "lat": 37.5475, "lng": 126.9225,
+        "transitInfo": "지하철 6호선 상수역 4번 출구 (도보 3분)"
+    },
+    "동작 서커스": {
+        "websiteUrl": "https://www.dfac.or.kr",
+        "govUrl": "https://culture.seoul.go.kr",
+        "address": "서울특별시 동작구 노들로 688 (본동 13-26, 노량진 축구장)",
+        "lat": 37.5142, "lng": 126.9425,
+        "transitInfo": "지하철 1·9호선 노량진역 9번 출구 (도보 4분)"
+    },
+    "용마폭포": {
+        "websiteUrl": "https://www.jncf.or.kr",
+        "govUrl": "https://www.jungnang.go.kr",
+        "address": "서울특별시 중랑구 용마산로 250-12 (면목동 73-1, 용마폭포공원 폭포광장)",
+        "lat": 37.5735, "lng": 127.0895,
+        "transitInfo": "지하철 7호선 용마산역 2번 출구 (도보 5분)"
+    },
+    "허준축제": {
+        "websiteUrl": "https://www.gangseo.seoul.kr",
+        "govUrl": "https://culture.seoul.go.kr",
+        "address": "서울특별시 강서구 마곡동로 161 (마곡동 812, 서울식물원 진입광장)",
+        "lat": 37.5695, "lng": 126.8355,
+        "transitInfo": "지하철 9호선·공항철도 마곡나루역 3번 출구 (도보 3분)"
+    },
+    "BEER FEST": {
+        "websiteUrl": "https://www.coex.co.kr",
+        "govUrl": "https://culture.seoul.go.kr",
+        "address": "서울특별시 강남구 영동대로 513 (삼성동 159, 코엑스 야외 K-POP 광장)",
+        "lat": 37.5115, "lng": 127.0595,
+        "transitInfo": "지하철 2호선 삼성역 5, 6번 출구 직결"
+    },
+    "크리에이티브X성수": {
+        "websiteUrl": "https://creativexseongsu.co.kr",
+        "govUrl": "https://culture.seoul.go.kr",
+        "address": "서울특별시 성동구 연무장15길 11 (성수동2가 273-13, 에스팩토리)",
+        "lat": 37.5415, "lng": 127.0565,
+        "transitInfo": "지하철 2호선 성수역 3번 출구 (도보 5분)"
+    },
+    "D.FESTA": {
+        "websiteUrl": "https://dfesta.co.kr",
+        "govUrl": "https://culture.seoul.go.kr",
+        "address": "서울특별시 종로구 대학로8길 25 (동숭동 1-40, 대학로 공간아울)",
+        "lat": 37.5815, "lng": 127.0035,
+        "transitInfo": "지하철 4호선 혜화역 1, 2번 출구 (도보 2분)"
+    },
+    "서울조각": {
+        "websiteUrl": "https://festival.seoul.go.kr",
+        "govUrl": "https://culture.seoul.go.kr",
+        "address": "서울특별시 종로구 송현동 48-9 (율곡로 39, 열린송현녹지광장)",
+        "lat": 37.5755, "lng": 126.9825,
+        "transitInfo": "지하철 3호선 안국역 1번 출구 (도보 2분)"
+    },
+    "M 클래식": {
+        "websiteUrl": "https://www.mfac.or.kr",
+        "govUrl": "https://culture.seoul.go.kr",
+        "address": "서울특별시 마포구 대흥로20길 34 (대흥동 251-1, 마포아트센터)",
+        "lat": 37.5498, "lng": 126.9455,
+        "transitInfo": "지하철 6호선 대흥역 2번 출구 (도보 5분)"
+    },
     "별빛야행": {
         "websiteUrl": "https://www.kh.or.kr/cont/view/fest/month/menu/210?thisPage=1&idx=110624",
         "govUrl": "https://www.royalpalace.go.kr",
