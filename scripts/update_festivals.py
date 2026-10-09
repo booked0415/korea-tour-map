@@ -287,7 +287,7 @@ OFFICIAL_PORTAL_REGISTRY = {
         "transitInfo": "지하철 1·9호선 노량진역 9번 출구 (도보 4분)"
     },
     "용마폭포": {
-        "websiteUrl": "https://www.jncf.or.kr",
+        "websiteUrl": "https://www.instagram.com/yongma_fe/",
         "govUrl": "https://www.jungnang.go.kr",
         "address": "서울특별시 중랑구 용마산로 250-12 (면목동 73-1, 용마폭포공원 폭포광장)",
         "lat": 37.5735, "lng": 127.0895,
