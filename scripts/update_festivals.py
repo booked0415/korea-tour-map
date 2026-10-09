@@ -174,17 +174,38 @@ def extract_festivals_with_gemini(api_key, articles, today_str):
 {text_corpus}
 """
 
-    # Candidate models and API versions to ensure maximum compatibility
-    api_configs = [
-        ("v1beta", "gemini-1.5-flash-latest"),
-        ("v1", "gemini-1.5-flash"),
-        ("v1beta", "gemini-1.5-flash"),
-        ("v1beta", "gemini-1.5-pro"),
-        ("v1beta", "gemini-2.0-flash-exp"),
-        ("v1beta", "gemini-2.5-flash")
-    ]
+    # Dynamic model discovery from API key
+    discovered_models = []
+    for ver in ["v1beta", "v1"]:
+        try:
+            list_url = f"https://generativelanguage.googleapis.com/{ver}/models?key={api_key}"
+            req = urllib.request.Request(list_url, headers={"User-Agent": "KoreaTourMap/1.0"})
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                if resp.status == 200:
+                    models_data = json.loads(resp.read().decode("utf-8"))
+                    for m in models_data.get("models", []):
+                        m_name = m.get("name", "")
+                        methods = m.get("supportedGenerationMethods", [])
+                        if "generateContent" in methods:
+                            clean_name = m_name.replace("models/", "")
+                            discovered_models.append((ver, clean_name))
+            if discovered_models:
+                print(f"[*] Discovered {len(discovered_models)} supported Gemini models via {ver} API!")
+                break
+        except Exception:
+            continue
 
-    for api_ver, model in api_configs:
+    if not discovered_models:
+        discovered_models = [
+            ("v1beta", "gemini-1.5-flash-latest"),
+            ("v1", "gemini-1.5-flash"),
+            ("v1beta", "gemini-1.5-flash"),
+            ("v1beta", "gemini-1.5-pro"),
+            ("v1beta", "gemini-2.0-flash-exp"),
+            ("v1beta", "gemini-2.5-flash")
+        ]
+
+    for api_ver, model in discovered_models:
         api_url = f"https://generativelanguage.googleapis.com/{api_ver}/models/{model}:generateContent?key={api_key}"
         payload = {
             "contents": [{
