@@ -165,7 +165,7 @@ def extract_festivals_with_gemini(api_key, articles, today_str):
 3. 장소(도시, 주소), 대략적인 위도(lat)와 경도(lng)를 대한민국 좌표계(위도 33~38.5, 경도 126~129.5) 내에서 정확히 매핑하세요.
 4. 반드시 순수 JSON 배열만 출력하세요. 마크다운 코드 블록(```json ... ```) 없이 대괄호 [] 로 시작하고 끝나야 합니다.
 
-[JSON 객체 스키마 예시]
+[JSON 객체 스키마 예시 (링크 우선순위 철저 준수)]
 [
   {{
     "name": "축제명 (예: 2026 인천개항장 국가유산야행)",
@@ -179,7 +179,9 @@ def extract_festivals_with_gemini(api_key, articles, today_str):
     "highlights": ["핵심 볼거리1", "볼거리2", "볼거리3"],
     "tip": "방문객을 위한 꿀팁 (주차, 추천 시간대 등)",
     "fee": "무료 또는 입장료 정보",
-    "sourceUrl": "관련 기사 또는 공식 링크"
+    "websiteUrl": "1순위: 해당 축제 전용 공식 웹사이트 URL (없으면 빈 문자열)",
+    "govUrl": "2순위: 지자체(시·군·구청) 또는 문화재단 등 공공기관 공식 안내 페이지 URL (없으면 빈 문자열)",
+    "visitKoreaUrl": "3순위: 대한민국 구석구석, 서울문화포털, VisitSeoul 또는 관련 언론 기사 링크 URL"
   }}
 ]
 
@@ -418,7 +420,9 @@ def main():
                 "tip": f_item.get("tip", "행사 세부 일정은 기상 및 주최측 사정에 따라 변동될 수 있습니다."),
                 "fee": f_item.get("fee", "무료/유료 현장 문의"),
                 "phone": "주최 측 문의",
-                "visitKoreaUrl": f_item.get("sourceUrl", "https://korean.visitkorea.or.kr"),
+                "websiteUrl": f_item.get("websiteUrl", ""),
+                "govUrl": f_item.get("govUrl", ""),
+                "visitKoreaUrl": f_item.get("visitKoreaUrl") or f_item.get("sourceUrl") or "https://korean.visitkorea.or.kr",
                 "tags": ["AI자동수집", "웹서칭연동", region, "인기축제"]
             }
             data.append(ai_entry)
