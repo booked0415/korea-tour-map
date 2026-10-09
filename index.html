@@ -2060,19 +2060,19 @@
 
     function loadData() {
       // Version 6 ensures newly verified dates overwrite previous cached values
-      const stored = localStorage.getItem('korea_tourism_database_v14');
+      const stored = localStorage.getItem('korea_tourism_database_v15');
       if (stored) {
         try { itemsData = JSON.parse(stored); }
         catch(e) { itemsData = [...DEFAULT_DATA]; }
       } else {
         itemsData = [...DEFAULT_DATA];
       }
-      bookmarks = JSON.parse(localStorage.getItem('korea_travel_bookmarks_v14') || '[]');
+      bookmarks = JSON.parse(localStorage.getItem('korea_travel_bookmarks_v15') || '[]');
       updateBookmarkBadges();
     }
 
     function saveData() {
-      localStorage.setItem('korea_tourism_database_v14', JSON.stringify(itemsData));
+      localStorage.setItem('korea_tourism_database_v15', JSON.stringify(itemsData));
     }
 
     // DOMESTIC BOUNDED MAP (KOREA ONLY)
@@ -2502,7 +2502,7 @@
       } else {
         bookmarks.push(id);
       }
-      localStorage.setItem('korea_travel_bookmarks_v14', JSON.stringify(bookmarks));
+      localStorage.setItem('korea_travel_bookmarks_v15', JSON.stringify(bookmarks));
       updateBookmarkBadges();
       renderCards();
       renderItinerary();
@@ -2859,7 +2859,7 @@
         clearItin.addEventListener('click', () => {
           if (confirm('선택한 여행 코스를 모두 비우시겠습니까?')) {
             bookmarks = [];
-            localStorage.removeItem('korea_travel_bookmarks_v14');
+            localStorage.removeItem('korea_travel_bookmarks_v15');
             updateBookmarkBadges();
             renderCards();
             renderItinerary();
