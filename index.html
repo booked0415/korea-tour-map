@@ -1336,6 +1336,12 @@
         gap: 6px !important;
       }
     }
+
+    /* 야간 모드: 구글 일반 도로 지도를 기반으로 블루라이트를 차단하고 눈의 피로를 최소화하는 안심 야간 필터 */
+    .night-comfort-tile {
+      filter: invert(90%) hue-rotate(180deg) brightness(85%) contrast(92%) sepia(20%) !important;
+      -webkit-filter: invert(90%) hue-rotate(180deg) brightness(85%) contrast(92%) sepia(20%) !important;
+    }
   </style>
 </head>
 <body>
@@ -1523,9 +1529,9 @@
           <span class="layer-btn-full">지형도 (Google Terrain)</span>
           <span class="layer-btn-short">지형</span>
         </button>
-        <button class="layer-btn" data-layer="dark" title="야간 다크 지도">
+        <button class="layer-btn" data-layer="dark" title="야간 모드 (블루라이트 차단 도로 지도)">
           <span>🌙</span>
-          <span class="layer-btn-full">야간 모드 (Dark)</span>
+          <span class="layer-btn-full">야간 모드 (블루라이트 차단)</span>
           <span class="layer-btn-short">야간</span>
         </button>
       </div>
@@ -2208,7 +2214,7 @@
 
     function loadData() {
       // Version 6 ensures newly verified dates overwrite previous cached values
-      const stored = localStorage.getItem('korea_tourism_database_v18');
+      const stored = localStorage.getItem('korea_tourism_database_v20');
       if (stored) {
         try { itemsData = JSON.parse(stored); }
         catch(e) { itemsData = [...DEFAULT_DATA]; }
@@ -2220,7 +2226,7 @@
     }
 
     function saveData() {
-      localStorage.setItem('korea_tourism_database_v18', JSON.stringify(itemsData));
+      localStorage.setItem('korea_tourism_database_v20', JSON.stringify(itemsData));
     }
 
     // DOMESTIC BOUNDED MAP (KOREA ONLY)
@@ -2246,9 +2252,11 @@
             attribution: '&copy; Google Maps Terrain (한국어 지형도)',
             maxZoom: 20
           }),
-          dark: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri Dark Canvas',
-            maxZoom: 16
+          dark: L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&hl=ko&gl=KR&x={x}&y={y}&z={z}', {
+            subdomains: ['0', '1', '2', '3'],
+            attribution: '&copy; Google Maps (야간 블루라이트 차단 도로지도)',
+            className: 'night-comfort-tile',
+            maxZoom: 20
           })
         };
 
