@@ -174,14 +174,18 @@ def extract_festivals_with_gemini(api_key, articles, today_str):
 {text_corpus}
 """
 
-    models_to_try = [
-        "gemini-2.5-flash",
-        "gemini-1.5-flash",
-        "gemini-1.5-pro"
+    # Candidate models and API versions to ensure maximum compatibility
+    api_configs = [
+        ("v1beta", "gemini-1.5-flash-latest"),
+        ("v1", "gemini-1.5-flash"),
+        ("v1beta", "gemini-1.5-flash"),
+        ("v1beta", "gemini-1.5-pro"),
+        ("v1beta", "gemini-2.0-flash-exp"),
+        ("v1beta", "gemini-2.5-flash")
     ]
 
-    for model in models_to_try:
-        api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+    for api_ver, model in api_configs:
+        api_url = f"https://generativelanguage.googleapis.com/{api_ver}/models/{model}:generateContent?key={api_key}"
         payload = {
             "contents": [{
                 "parts": [{"text": prompt}]
