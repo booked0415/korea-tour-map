@@ -751,6 +751,15 @@ def main():
     date_pattern = r'const CURRENT_DATE_STR = "[^"]+";'
     new_date_def = f'const CURRENT_DATE_STR = "{today_str}";'
     html, n_sub = re.subn(date_pattern, new_date_def, html)
+    
+    # Update or inject LAST_SYNC_TIMESTAMP in index.html
+    ts_pattern = r'const LAST_SYNC_TIMESTAMP = "[^"]*";'
+    new_ts_def = f'const LAST_SYNC_TIMESTAMP = "{timestamp_str}";'
+    if re.search(ts_pattern, html):
+        html = re.sub(ts_pattern, new_ts_def, html)
+    else:
+        html = html.replace(new_date_def, f'{new_date_def}\n    const LAST_SYNC_TIMESTAMP = "{timestamp_str}";')
+    print(f"[*] Updated LAST_SYNC_TIMESTAMP -> {timestamp_str}")
     print(f"[*] Updated CURRENT_DATE_STR -> {today_str} ({n_sub} replacements)")
 
     # 3. Update quick filter label
