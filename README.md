@@ -40,3 +40,43 @@
 ## ⚙️ 완전 무인 자동화 아키텍처 (GitHub Actions ➔ Vercel)
 
 사람의 수동 관리 없이 최신 축제 정보가 매일 스스로 수집·검증되어 프로덕션 웹사이트에 무중단 자동 배포됩니다.
+
+```
+[다중 데이터 소스]
+├─ 한국관광공사 TourAPI 4.0 (전국 문화관광축제)
+├─ 서울문화포털 열린데이터광장 API (서울 25개 자치구 축제·공연·전시 1,000건 대량 연동)
+└─ Google News & 웹 크롤링 + Gemini AI (최신 개막·야간 미디어쇼 스마트 발굴)
+         │
+         ▼
+[GitHub Actions 무인 봇: scripts/update_festivals.py]
+├─ 매일 4회 자동 실행 (한국 시간 07:23, 13:23, 19:23, 01:23 KST / 6시간 간격)
+├─ 전 세계 트래픽 몰림(정각/30분) 대기열 지연 방지를 위한 23분 분산 스케줄링
+├─ 지능형 공식 포털 레지스트리(OFFICIAL_PORTAL_REGISTRY) 기반 1순위 링크 자동 매핑
+├─ 수면/다리 위 좌표 오차를 육지 진입로 좌표로 자동 교정
+└─ 하트비트 커밋 및 브라우저 캐시 버전 자동 판올림
+         │
+         ▼
+[Vercel 프로덕션 자동 배포]
+└─ 깃허브 커밋 발생 즉시 5초 만에 감지하여 글로벌 CDN 웹앱 실시간 배포
+```
+
+---
+
+## 🔑 GitHub Secrets 환경변수 구성
+
+GitHub 저장소 `Settings > Secrets and variables > Actions`에 아래 API 키를 등록하면 모든 파이프라인이 100% 활성화됩니다.
+
+| Secret 이름 | 설명 | 필수 여부 |
+| :--- | :--- | :--- |
+| `SEOUL_API_KEY` | 서울 열린데이터광장(data.seoul.go.kr) 인증키 (서울 전역 1,000건 문화행사 수집) | 권장 |
+| `TOUR_API_KEY` | 공공데이터포털(data.go.kr) 한국관광공사 국문 관광정보 TourAPI 4.0 인증키 | 권장 |
+| `GEMINI_API_KEY` | Google AI Studio(aistudio.google.com) Gemini API 키 (인터넷 뉴스 축제 AI 발굴) | 선택 |
+
+---
+
+## 📱 기술 스택 (Tech Stack)
+
+- **Frontend**: HTML5, Vanilla JavaScript (ES6+), CSS3 (Flexbox/Grid), Leaflet.js (OpenStreetMap)
+- **Automation / Bot**: Python 3.11, GitHub Actions (CI/CD Scheduled Cron)
+- **Deployment**: Vercel (Global Edge CDN), PWA (Service Worker & Web App Manifest)
+- **APIs**: 한국관광공사 TourAPI 4.0, 서울시 열린데이터광장 Open API, Google Gemini AI API
