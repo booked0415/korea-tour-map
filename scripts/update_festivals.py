@@ -20,6 +20,26 @@ import datetime
 # Ensures 100% full automation without regression or manual maintenance
 # ==============================================================================
 OFFICIAL_PORTAL_REGISTRY = {
+    "대-락": {
+        "websiteUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=812",
+        "govUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=812",
+        "address": "서울특별시 종로구 대학로 144 (동숭동 1-67, 서울연극센터 및 대학로 일대)",
+        "lat": 37.5835, "lng": 127.0015,
+        "startDate": "2026-08-01", "endDate": "2026-11-21",
+        "phone": "02-743-9333 (서울연극센터)",
+        "fee": "무료",
+        "transitInfo": "지하철 4호선 혜화역 1번 출구 바로 앞"
+    },
+    "대락": {
+        "websiteUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=812",
+        "govUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=812",
+        "address": "서울특별시 종로구 대학로 144 (동숭동 1-67, 서울연극센터 및 대학로 일대)",
+        "lat": 37.5835, "lng": 127.0015,
+        "startDate": "2026-08-01", "endDate": "2026-11-21",
+        "phone": "02-743-9333 (서울연극센터)",
+        "fee": "무료",
+        "transitInfo": "지하철 4호선 혜화역 1번 출구 바로 앞"
+    },
     "문화원 엑스포": {
         "websiteUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159730&menuNo=200010",
         "govUrl": "https://culture.seoul.go.kr",
