@@ -20,6 +20,25 @@ import datetime
 # Ensures 100% full automation without regression or manual maintenance
 # ==============================================================================
 OFFICIAL_PORTAL_REGISTRY = {
+    "문화원 엑스포": {
+        "websiteUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159730&menuNo=200010",
+        "govUrl": "https://culture.seoul.go.kr",
+        "address": "서울특별시 종로구 세종대로 175 (세종로 1-68, 광화문광장 놀이마당)",
+        "lat": 37.5724, "lng": 126.9768,
+        "startDate": "2026-10-28", "endDate": "2026-10-28",
+        "phone": "02-2233-9084 (서울시문화원연합회)",
+        "fee": "무료",
+        "transitInfo": "지하철 5호선 광화문역 2, 9번 출구 직결, 3호선 경복궁역 6번 출구 (도보 5분 광화문광장)"
+    },
+    "운현궁": {
+        "websiteUrl": "https://www.unhyeongung.or.kr",
+        "govUrl": "https://culture.seoul.go.kr",
+        "address": "서울특별시 종로구 삼일대로 464 (운니동 114-10, 운현궁 일원)",
+        "lat": 37.5760, "lng": 126.9875,
+        "phone": "02-766-9090 (운현궁 관리사무소)",
+        "fee": "무료",
+        "transitInfo": "지하철 3호선 안국역 4번 출구 (도보 1분 운현궁 정문)"
+    },
     "양재아트살롱": {
         "websiteUrl": "https://yangjaeartsalon.co.kr/",
         "govUrl": "https://www.seocho.go.kr",
@@ -397,23 +416,36 @@ def auto_calibrate_festival_metadata(item):
     for keyword, meta in OFFICIAL_PORTAL_REGISTRY.items():
         if keyword in name:
             if meta.get("websiteUrl"):
-                # Always prioritize verified actionable official event portals / detail pages
                 item["websiteUrl"] = meta["websiteUrl"]
-                item["websiteUrl"] = meta["websiteUrl"]
-            elif meta.get("websiteUrl") and ("visitkorea" in item.get("websiteUrl", "").lower() or "seoul.go.kr" in item.get("websiteUrl", "").lower()):
-                # Promote to dedicated festival portal
-                item["websiteUrl"] = meta["websiteUrl"]
-                
-            if meta.get("govUrl") and not item.get("govUrl"):
+            if meta.get("govUrl"):
                 item["govUrl"] = meta["govUrl"]
             if meta.get("address"):
                 item["address"] = meta["address"]
             if meta.get("lat") and meta.get("lng"):
                 item["lat"] = meta["lat"]
                 item["lng"] = meta["lng"]
+            if meta.get("startDate"):
+                item["startDate"] = meta["startDate"]
+            if meta.get("endDate"):
+                item["endDate"] = meta["endDate"]
+                item["period"] = f"{meta['startDate']} ~ {meta['endDate']}"
+            if meta.get("phone"):
+                item["phone"] = meta["phone"]
+            if meta.get("fee"):
+                item["fee"] = meta["fee"]
             if meta.get("transitInfo"):
                 item["transitInfo"] = meta["transitInfo"]
             break
+
+    # Deep-link defense: convert bare portal roots to direct search URLs
+    w_url = item.get("websiteUrl", "").strip()
+    if w_url and ("culture.seoul.go.kr" in w_url) and ("cultcode=" not in w_url) and ("searchStr=" not in w_url):
+        clean_q = re.sub(r'\[.*?\]|\(.*?\)|제\d+회|\d{4}년?', '', name).strip()
+        item["websiteUrl"] = f"https://culture.seoul.go.kr/culture/culture/cultureEvent/list.do?searchStr={urllib.parse.quote(clean_q or name)}"
+    elif w_url and ("visitkorea.or.kr" in w_url) and ("cotid=" not in w_url) and ("fstvlCntntsId=" not in w_url) and ("searchWord=" not in w_url):
+        clean_q = re.sub(r'\[.*?\]|\(.*?\)|제\d+회|\d{4}년?', '', name).strip()
+        item["websiteUrl"] = f"https://korean.visitkorea.or.kr/kfes/list/totalSearchList.do?searchWord={urllib.parse.quote(clean_q or name)}"
+        
     return item
 
 import urllib.parse
@@ -776,6 +808,9 @@ def main():
 
     data = json.loads(m.group(1))
     print(f"[*] Successfully loaded {len(data)} items from database")
+    # Auto-calibrate all items with verified portal registries
+    data = [auto_calibrate_festival_metadata(it) for it in data]
+
 
     existing_names = {item['name'].replace(" ", "") for item in data}
     existing_cores = {normalize_festival_core_name(item['name']) for item in data if len(normalize_festival_core_name(item['name'])) >= 3}
@@ -909,9 +944,9 @@ def main():
             "highlights": [codename, place, "서울시 문화행사"],
             "tip": f"관람 대상: {se.get('USE_TRGT', '시민 누구나')}. 사전 예약 및 세부 프로그램은 안내처를 확인하세요.",
             "fee": fee_str,
-            "phone": "다산콜센터 02-120",
-            "websiteUrl": hpage if (hpage and not "culture.seoul.go.kr" in hpage) else "",
-            "govUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/list.do",
+            "phone": se.get("INQUIRY", "").strip() or "다산콜센터 02-120",
+            "websiteUrl": hpage or f"https://culture.seoul.go.kr/culture/culture/cultureEvent/list.do?searchStr={urllib.parse.quote(title)}",
+            "govUrl": "https://culture.seoul.go.kr",
             "visitKoreaUrl": hpage or "https://culture.seoul.go.kr",
             "tags": ["서울문화포털", codename, guname, "서울문화행사", "서울"]
         }
