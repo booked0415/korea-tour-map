@@ -31,6 +31,38 @@ DEFAULT_GOOGLE_SHEET_ID = "1pDFmV_bbrA8Y1jqJVtIGD1Hwt7wy7uTvcmfAQCenT_c"
 # Prevents regression and ensures accurate land access coordinates & deep links
 # ==============================================================================
 OFFICIAL_PORTAL_REGISTRY = {
+    "그림책": {
+        "websiteUrl": "https://yangjae.seocholib.or.kr/NoticeInfoDetail/26288",
+        "govUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=174dc17e-b58d-46f1-ae12-8fba1d329f4d"
+    },
+    "새우젓": {
+        "websiteUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=683",
+        "govUrl": "https://www.mapo.go.kr"
+    },
+    "한강페스티벌": {
+        "websiteUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=400",
+        "govUrl": "https://hangang.seoul.go.kr"
+    },
+    "백년나이트": {
+        "websiteUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159740&menuNo=200010",
+        "govUrl": "https://www.gangbuk.go.kr"
+    },
+    "조계사": {
+        "websiteUrl": "http://www.beopbo.com/news/articleView.html?idxno=338297",
+        "govUrl": "https://www.jogyesa.kr"
+    },
+    "광화문마켓": {
+        "websiteUrl": "https://mediahub.seoul.go.kr/archives/2019647",
+        "govUrl": "https://gwanghwamun.seoul.go.kr"
+    },
+    "그린칩스": {
+        "websiteUrl": "https://mediahub.seoul.go.kr/archives/2019680",
+        "govUrl": "https://ddp.or.kr"
+    },
+    "매헌시민의숲": {
+        "websiteUrl": "https://news.seoul.go.kr/gov/archives/581185",
+        "govUrl": "https://parks.seoul.go.kr"
+    },
     "대-락": {
         "websiteUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=812",
         "govUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=812"
