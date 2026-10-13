@@ -31,6 +31,27 @@ DEFAULT_GOOGLE_SHEET_ID = "1_oM-TzsoLpHvKvxlT_YKwKyaygfjFkd_kxpKccr-AhY"
 # Prevents regression and ensures accurate land access coordinates & deep links
 # ==============================================================================
 OFFICIAL_PORTAL_REGISTRY = {
+    "사육신": {
+        "lat": 37.5141,
+        "lng": 126.9486,
+        "address": "서울특별시 동작구 노량진로 191 (노량진동 155-1, 사육신역사공원 내 사육신역사관 및 야외마당)",
+        "websiteUrl": "https://www.idfac.or.kr/sub_new/menu02_02_01.php",
+        "govUrl": "https://www.idfac.or.kr/",
+        "visitKoreaUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159614"
+    },
+    "충효예술": {
+        "lat": 37.5141,
+        "lng": 126.9486,
+        "address": "서울특별시 동작구 노량진로 191 (노량진동 155-1, 사육신역사공원 내 사육신역사관 및 야외마당)",
+        "websiteUrl": "https://www.idfac.or.kr/sub_new/menu02_02_01.php",
+        "govUrl": "https://www.idfac.or.kr/",
+        "visitKoreaUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159614"
+    },
+    "동작 서커스": {
+        "websiteUrl": "https://www.idfac.or.kr/",
+        "govUrl": "https://culture.seoul.go.kr"
+    },
+
     "매헌시민의숲": {
         "lat": 37.4705,
         "lng": 127.0355,
