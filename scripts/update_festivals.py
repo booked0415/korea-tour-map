@@ -31,6 +31,60 @@ DEFAULT_GOOGLE_SHEET_ID = "1_oM-TzsoLpHvKvxlT_YKwKyaygfjFkd_kxpKccr-AhY"
 # Prevents regression and ensures accurate land access coordinates & deep links
 # ==============================================================================
 OFFICIAL_PORTAL_REGISTRY = {
+    "동네방네비프": {
+        "lat": 37.5302,
+        "lng": 126.9174,
+        "address": "서울특별시 영등포구 의사당대로 1 (여의도동 1, 국회의원회관 2층 대회의실)",
+        "websiteUrl": "https://everywhere.biff.kr/",
+        "govUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159697",
+        "transitInfo": "지하철 9호선 국회의사당역 6번 출구 (도보 5분 국회의원회관)"
+    },
+    "D.FESTA": {
+        "lat": 37.5815,
+        "lng": 127.0035,
+        "address": "서울특별시 종로구 대학로8길 25 (동숭동 1-40, 대학로 공간아울)",
+        "websiteUrl": "https://stheater.or.kr/perform-ad/?idx=175023327&bmode=view",
+        "govUrl": "https://culture.seoul.go.kr"
+    },
+    "소극장축제": {
+        "lat": 37.5815,
+        "lng": 127.0035,
+        "address": "서울특별시 종로구 대학로8길 25 (동숭동 1-40, 대학로 공간아울)",
+        "websiteUrl": "https://stheater.or.kr/perform-ad/?idx=175023327&bmode=view",
+        "govUrl": "https://culture.seoul.go.kr"
+    },
+    "부산 불꽃축제": {
+        "lat": 35.1532,
+        "lng": 129.1186,
+        "address": "부산광역시 수영구 광안해변로 219 (광안동 192-20, 광안리해수욕장 및 광안대교 일원)",
+        "websiteUrl": "https://www.bfo.or.kr/festival_fireworks/",
+        "govUrl": "https://www.busan.go.kr",
+        "transitInfo": "부산도시철도 2호선 광안역 3·5번 출구 (도보 10분 광안리해변)"
+    },
+    "부산불꽃": {
+        "lat": 35.1532,
+        "lng": 129.1186,
+        "address": "부산광역시 수영구 광안해변로 219 (광안동 192-20, 광안리해수욕장 및 광안대교 일원)",
+        "websiteUrl": "https://www.bfo.or.kr/festival_fireworks/",
+        "govUrl": "https://www.busan.go.kr",
+        "transitInfo": "부산도시철도 2호선 광안역 3·5번 출구 (도보 10분 광안리해변)"
+    },
+    "울산고래축제": {
+        "websiteUrl": "http://www.ulsanwhale.com/",
+        "govUrl": "https://www.ulsan.go.kr"
+    },
+    "라베니체": {
+        "websiteUrl": "https://www.gimpo.go.kr/culture/selectTourCntntsWebList.do?key=6808&ctgry=4",
+        "govUrl": "https://www.gimpo.go.kr"
+    },
+    "통닭거리": {
+        "websiteUrl": "https://www.suwon.go.kr/culture/ingCultureView.do?ctrSeqNo=1948&listType=ing",
+        "govUrl": "https://www.suwon.go.kr"
+    },
+    "연천국화": {
+        "websiteUrl": "https://www.yeoncheon.go.kr",
+        "govUrl": "https://www.yeoncheon.go.kr"
+    },
     "사육신": {
         "lat": 37.5141,
         "lng": 126.9486,
@@ -228,9 +282,12 @@ def auto_calibrate_festival_metadata(item):
     name = item.get("name", "")
     for key, reg in OFFICIAL_PORTAL_REGISTRY.items():
         if key in name:
-            if "websiteUrl" in reg and not item.get("websiteUrl"):
-                item["websiteUrl"] = reg["websiteUrl"]
-            if "govUrl" in reg and not item.get("govUrl"):
+            # Overwrite if empty or if registry provides high-priority official portal
+            cur_url = item.get("websiteUrl", "")
+            if "websiteUrl" in reg:
+                if not cur_url or any(bad in cur_url for bad in ["dfesta.co.kr", "dfac.or.kr", "hanwhapromise.com", "yna.co.kr", "weeklytoday.com", "m-i.kr", "thekorea.kr"]):
+                    item["websiteUrl"] = reg["websiteUrl"]
+            if "govUrl" in reg and (not item.get("govUrl") or "seoul.go.kr" in item.get("govUrl") and "부산" in name):
                 item["govUrl"] = reg["govUrl"]
             if "lat" in reg:
                 item["lat"] = reg["lat"]
@@ -238,6 +295,8 @@ def auto_calibrate_festival_metadata(item):
                 item["lng"] = reg["lng"]
             if "address" in reg:
                 item["address"] = reg["address"]
+            if "transitInfo" in reg:
+                item["transitInfo"] = reg["transitInfo"]
             break
 
     # Fix portal landing page to direct search query if culture.seoul.go.kr without query
