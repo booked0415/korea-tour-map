@@ -470,6 +470,8 @@ def auto_calibrate_festival_metadata(item):
 
 import urllib.parse
 import urllib.request
+import csv
+import io
 import xml.etree.ElementTree as ET
 
 def parse_area_code(code_str):
@@ -777,6 +779,51 @@ def extract_festivals_with_gemini(api_key, articles, today_str):
     print("[!] Could not extract festivals via Gemini API. Moving forward.")
     return []
 
+
+# ==============================================================================
+# 📊 GOOGLE SHEETS LIVE OVERRIDE & REAL-TIME FEED INTEGRATION
+# Allows AI agent & users to manage festivals/cancellations directly via Google Sheets!
+# ==============================================================================
+DEFAULT_GOOGLE_SHEET_ID = "1tC4MDTWus7mt3AWD1m3DNIhGwTYjAMV7EZSpsrNAiYA"
+
+def fetch_google_sheet_override(sheet_target=None):
+    """
+    Fetches real-time festival additions, edits, or cancellations from a Google Sheet CSV export.
+    Supports full Google Sheet URL, CSV export URL, or the Sheet ID.
+    Expected Columns:
+    상태(등록/취소), 축제명, 구분, 지역, 시작일, 종료일, 상세주소, 위도, 경도, 소개및특징, 문의처, 공식홈페이지URL, 골든타임팁
+    """
+    target = sheet_target or os.environ.get("FESTIVAL_SHEET_URL", "").strip() or DEFAULT_GOOGLE_SHEET_ID
+    if not target:
+        return []
+
+    # Extract Sheet ID if full URL provided
+    if "docs.google.com/spreadsheets" in target:
+        m = re.search(r'/d/([a-zA-Z0-9-_]+)', target)
+        sheet_id = m.group(1) if m else target
+    else:
+        sheet_id = target.strip()
+
+    csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
+    print(f"[*] Calling Google Sheet Real-time Feed: {csv_url}")
+
+    try:
+        req = urllib.request.Request(
+            csv_url,
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) KoreaFestivalBot/1.0"}
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            content = resp.read().decode('utf-8')
+        
+        reader = csv.DictReader(io.StringIO(content))
+        rows = list(reader)
+        print(f"[✓] Successfully retrieved {len(rows)} rows from Google Sheet feed!")
+        return rows
+    except Exception as e:
+        print(f"[!] Google Sheet notice: {e}. Moving forward with existing data.")
+        return []
+
+
 def main():
     print("="*60)
     print("🚀 Starting Korea Festival Daily Auto-Update Script (AI Enhanced)")
@@ -979,6 +1026,94 @@ def main():
 
     if seoul_added > 0:
         print(f"[✓] Added {seoul_added} Seoul culture portal events into database!")
+
+    
+    # 5-2. Google Sheet Real-time Ingestion & Dynamic Override
+    sheet_rows = fetch_google_sheet_override()
+    sheet_added = 0
+    sheet_cancelled = 0
+    sheet_updated = 0
+
+    for r in sheet_rows:
+        raw_status = r.get("상태(등록/취소)", "").strip()
+        raw_name = r.get("축제명", "").strip()
+        if not raw_name:
+            continue
+
+        norm_name = raw_name.replace(" ", "")
+
+        # A. Cancellation Processing
+        if "취소" in raw_status:
+            before_len = len(data)
+            data = [it for it in data if it.get("name", "").replace(" ", "") != norm_name]
+            if len(data) < before_len:
+                sheet_cancelled += (before_len - len(data))
+                print(f"[-] Removed cancelled festival from database: {raw_name}")
+            continue
+
+        # B. Addition / Update Processing
+        s_date = r.get("시작일", "").strip()
+        e_date = r.get("종료일", "").strip()
+        addr = r.get("상세주소", "").strip() or f"{r.get('지역', '전국')} 행사 일원"
+        
+        try:
+            lat = float(r.get("위도", 0)) if r.get("위도") else 37.5665
+            lng = float(r.get("경도", 0)) if r.get("경도") else 126.9780
+        except Exception:
+            lat, lng = 37.5665, 126.9780
+
+        region = r.get("지역", "전국").strip()
+        summary = r.get("소개및특징", "").strip() or f"{raw_name} 행사입니다."
+        phone = r.get("문의처", "").strip() or "공식 안내처 문의"
+        url = r.get("공식홈페이지URL", "").strip()
+        tip = r.get("골든타임팁", "").strip() or "공식 안내를 참고하여 방문하세요."
+
+        existing_item = next((it for it in data if it.get("name", "").replace(" ", "") == norm_name), None)
+        if existing_item:
+            if s_date: existing_item["startDate"] = s_date
+            if e_date: existing_item["endDate"] = e_date
+            if s_date and e_date: existing_item["period"] = f"{s_date} ~ {e_date}"
+            if addr: existing_item["address"] = addr
+            if lat and lng:
+                existing_item["lat"] = lat
+                existing_item["lng"] = lng
+            if summary: existing_item["summary"] = summary
+            if phone: existing_item["phone"] = phone
+            if url: existing_item["websiteUrl"] = url
+            if tip: existing_item["tip"] = tip
+            sheet_updated += 1
+            print(f"[*] Updated existing festival from Google Sheet: {raw_name}")
+        else:
+            new_item = {
+                "id": f"sheet-{abs(hash(raw_name)) % 1000000}",
+                "name": raw_name,
+                "type": r.get("구분", "festival").strip() or "festival",
+                "category": "축제/행사",
+                "region": region,
+                "provinceGroup": parse_province_group(region),
+                "season": "가을",
+                "startDate": s_date,
+                "endDate": e_date,
+                "period": f"{s_date} ~ {e_date}",
+                "lat": lat,
+                "lng": lng,
+                "address": addr,
+                "summary": summary,
+                "highlights": ["구글시트 실시간 반영", "문화 행사", "대표 축제"],
+                "tip": tip,
+                "fee": "무료",
+                "phone": phone,
+                "websiteUrl": url,
+                "tags": ["구글시트연동", region, "실시간축제"]
+            }
+            new_item = auto_calibrate_festival_metadata(new_item)
+            data.insert(0, new_item)
+            existing_names.add(norm_name)
+            sheet_added += 1
+            print(f"[+] Added new festival from Google Sheet: {raw_name}")
+
+    if sheet_added > 0 or sheet_cancelled > 0 or sheet_updated > 0:
+        print(f"[*] Google Sheet sync result -> Added: {sheet_added}, Cancelled: {sheet_cancelled}, Updated: {sheet_updated}")
 
     # 6. Check GEMINI_API_KEY secret and run Web Search + AI Extraction
     gemini_key = os.environ.get("GEMINI_API_KEY", "").strip()
