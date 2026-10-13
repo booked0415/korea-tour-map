@@ -24,16 +24,60 @@ import urllib.request
 # ==============================================================================
 # 📊 GOOGLE SHEETS LIVE OVERRIDE & REAL-TIME FEED CONFIGURATION
 # ==============================================================================
-DEFAULT_GOOGLE_SHEET_ID = "1pDFmV_bbrA8Y1jqJVtIGD1Hwt7wy7uTvcmfAQCenT_c"
+DEFAULT_GOOGLE_SHEET_ID = "1_oM-TzsoLpHvKvxlT_YKwKyaygfjFkd_kxpKccr-AhY"
 
 # ==============================================================================
 # 🎯 AUTOMATED VERIFIED OFFICIAL PORTAL & LAND COORDINATES REGISTRY
 # Prevents regression and ensures accurate land access coordinates & deep links
 # ==============================================================================
 OFFICIAL_PORTAL_REGISTRY = {
+    "매헌시민의숲": {
+        "lat": 37.4704,
+        "lng": 127.0392,
+        "address": "서울특별시 서초구 매헌로 99 (양재동 236, 매헌시민의숲 잔디광장 일원)",
+        "websiteUrl": "https://www.seoul.go.kr/festa/garden/y2026/maeheon-forest/maeheon-intro/maeheon-overview",
+        "govUrl": "https://parks.seoul.go.kr"
+    },
+    "드론 라이트": {
+        "lat": 37.5285,
+        "lng": 127.0680,
+        "address": "서울특별시 광진구 강변북로 139 (자양동 427-1, 뚝섬한강공원 수변무대)",
+        "websiteUrl": "https://www.seouldroneshow.com/",
+        "govUrl": "https://hangang.seoul.go.kr"
+    },
+    "드론라이트": {
+        "lat": 37.5285,
+        "lng": 127.0680,
+        "address": "서울특별시 광진구 강변북로 139 (자양동 427-1, 뚝섬한강공원 수변무대)",
+        "websiteUrl": "https://www.seouldroneshow.com/",
+        "govUrl": "https://hangang.seoul.go.kr"
+    },
     "그림책": {
         "websiteUrl": "https://yangjae.seocholib.or.kr/NoticeInfoDetail/26288",
         "govUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=174dc17e-b58d-46f1-ae12-8fba1d329f4d"
+    },
+    "억새축제": {
+        "websiteUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=683",
+        "govUrl": "https://parks.seoul.go.kr"
+    },
+    "한성백제": {
+        "websiteUrl": "https://www.songpa.go.kr/hanseong/",
+        "govUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=581"
+    },
+    "노원달빛": {
+        "websiteUrl": "https://moonlightwalk.kr/",
+        "govUrl": "https://www.nowonarts.kr/"
+    },
+    "정동야행": {
+        "websiteUrl": "https://www.jeongdong-culturenight.kr/",
+        "govUrl": "https://www.junggu.seoul.kr"
+    },
+    "서울국제정원박람회": {
+        "lat": 37.5444,
+        "lng": 127.0374,
+        "address": "서울특별시 성동구 뚝섬로 273 (성수동1가 720, 서울숲 일원)",
+        "websiteUrl": "https://www.seoul.go.kr/festa/garden/y2026/introduce/introduce2026",
+        "govUrl": "https://parks.seoul.go.kr"
     },
     "새우젓": {
         "websiteUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=683",
@@ -58,18 +102,6 @@ OFFICIAL_PORTAL_REGISTRY = {
     "그린칩스": {
         "websiteUrl": "https://mediahub.seoul.go.kr/archives/2019680",
         "govUrl": "https://ddp.or.kr"
-    },
-    "매헌시민의숲": {
-        "websiteUrl": "https://news.seoul.go.kr/gov/archives/581185",
-        "govUrl": "https://parks.seoul.go.kr"
-    },
-    "대-락": {
-        "websiteUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=812",
-        "govUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=812"
-    },
-    "드론라이트쇼": {
-        "websiteUrl": "https://korean.visitseoul.net",
-        "govUrl": "https://culture.seoul.go.kr"
     },
     "잠수교": {
         "lat": 37.5105,
@@ -97,13 +129,6 @@ OFFICIAL_PORTAL_REGISTRY = {
     "궁중문화축전": {
         "websiteUrl": "https://www.chf.or.kr/fest",
         "govUrl": "https://www.royalpalace.go.kr"
-    },
-    "정원박람회": {
-        "lat": 37.5444,
-        "lng": 127.0374,
-        "address": "서울특별시 성동구 뚝섬로 273 (성수동1가 720, 서울숲)",
-        "websiteUrl": "https://festival.seoul.go.kr/garden",
-        "govUrl": "https://parks.seoul.go.kr"
     },
     "자라섬재즈": {
         "websiteUrl": "http://www.jarasumjazz.com/",
