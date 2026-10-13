@@ -32,8 +32,8 @@ DEFAULT_GOOGLE_SHEET_ID = "1_oM-TzsoLpHvKvxlT_YKwKyaygfjFkd_kxpKccr-AhY"
 # ==============================================================================
 OFFICIAL_PORTAL_REGISTRY = {
     "매헌시민의숲": {
-        "lat": 37.4704,
-        "lng": 127.0392,
+        "lat": 37.4705,
+        "lng": 127.0355,
         "address": "서울특별시 서초구 매헌로 99 (양재동 236, 매헌시민의숲 잔디광장 일원)",
         "websiteUrl": "https://www.seoul.go.kr/festa/garden/y2026/maeheon-forest/maeheon-intro/maeheon-overview",
         "govUrl": "https://parks.seoul.go.kr"
@@ -52,7 +52,31 @@ OFFICIAL_PORTAL_REGISTRY = {
         "websiteUrl": "https://www.seouldroneshow.com/",
         "govUrl": "https://hangang.seoul.go.kr"
     },
+    "양재천을 품은 야외도서관": {
+        "lat": 37.4735,
+        "lng": 127.0334,
+        "address": "서울특별시 서초구 양재천로 33 (양재동 102-6, 서초구립 양재도서관 및 앞 오솔길 야외도서관)",
+        "websiteUrl": "https://yangjae.seocholib.or.kr/NoticeInfoDetail/26288",
+        "govUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=174dc17e-b58d-46f1-ae12-8fba1d329f4d"
+    },
+    "양재도서관": {
+        "lat": 37.4735,
+        "lng": 127.0334,
+        "address": "서울특별시 서초구 양재천로 33 (양재동 102-6, 서초구립 양재도서관 및 앞 오솔길)",
+        "websiteUrl": "https://yangjae.seocholib.or.kr/NoticeInfoDetail/26288",
+        "govUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=174dc17e-b58d-46f1-ae12-8fba1d329f4d"
+    },
+    "야외도서관": {
+        "lat": 37.4735,
+        "lng": 127.0334,
+        "address": "서울특별시 서초구 양재천로 33 (양재동 102-6, 서초구립 양재도서관 및 앞 오솔길 야외도서관)",
+        "websiteUrl": "https://yangjae.seocholib.or.kr/NoticeInfoDetail/26288",
+        "govUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=174dc17e-b58d-46f1-ae12-8fba1d329f4d"
+    },
     "그림책": {
+        "lat": 37.4735,
+        "lng": 127.0334,
+        "address": "서울특별시 서초구 양재천로 33 (양재동 102-6, 서초구립 양재도서관 및 앞 오솔길)",
         "websiteUrl": "https://yangjae.seocholib.or.kr/NoticeInfoDetail/26288",
         "govUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=174dc17e-b58d-46f1-ae12-8fba1d329f4d"
     },
