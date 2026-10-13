@@ -24,7 +24,7 @@ import urllib.request
 # ==============================================================================
 # 📊 GOOGLE SHEETS LIVE OVERRIDE & REAL-TIME FEED CONFIGURATION
 # ==============================================================================
-DEFAULT_GOOGLE_SHEET_ID = "1tC4MDTWus7mt3AWD1m3DNIhGwTYjAMV7EZSpsrNAiYA"
+DEFAULT_GOOGLE_SHEET_ID = "1pDFmV_bbrA8Y1jqJVtIGD1Hwt7wy7uTvcmfAQCenT_c"
 
 # ==============================================================================
 # 🎯 AUTOMATED VERIFIED OFFICIAL PORTAL & LAND COORDINATES REGISTRY
