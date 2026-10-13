@@ -31,13 +31,52 @@ DEFAULT_GOOGLE_SHEET_ID = "1_oM-TzsoLpHvKvxlT_YKwKyaygfjFkd_kxpKccr-AhY"
 # Prevents regression and ensures accurate land access coordinates & deep links
 # ==============================================================================
 OFFICIAL_PORTAL_REGISTRY = {
+    "사육신": {
+        "lat": 37.5141,
+        "lng": 126.9486,
+        "address": "서울특별시 동작구 노량진로 191 (노량진동 155-1, 사육신역사공원 내 사육신역사관 및 야외마당)",
+        "websiteUrl": "https://www.idfac.or.kr/bbs/board.php?bo_table=gallery_info&wr_id=324",
+        "govUrl": "https://www.idfac.or.kr/",
+        "visitKoreaUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159614"
+    },
+    "충효예술": {
+        "lat": 37.5141,
+        "lng": 126.9486,
+        "address": "서울특별시 동작구 노량진로 191 (노량진동 155-1, 사육신역사공원 내 사육신역사관 및 야외마당)",
+        "websiteUrl": "https://www.idfac.or.kr/bbs/board.php?bo_table=gallery_info&wr_id=324",
+        "govUrl": "https://www.idfac.or.kr/",
+        "visitKoreaUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159614"
+    },
     "동네방네비프": {
         "lat": 37.5302,
         "lng": 126.9174,
         "address": "서울특별시 영등포구 의사당대로 1 (여의도동 1, 국회의원회관 2층 대회의실)",
-        "websiteUrl": "https://everywhere.biff.kr/",
-        "govUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159697",
+        "websiteUrl": "https://reservation.assembly.go.kr/reserve/contents/booking/contentsDetail.do?cntsDtlClsCd=EVT301&cntsUniqId=4957022",
+        "govUrl": "https://everywhere.biff.kr/",
         "transitInfo": "지하철 9호선 국회의사당역 6번 출구 (도보 5분 국회의원회관)"
+    },
+    "국회문화극장": {
+        "lat": 37.5302,
+        "lng": 126.9174,
+        "address": "서울특별시 영등포구 의사당대로 1 (여의도동 1, 국회의원회관 2층 대회의실)",
+        "websiteUrl": "https://reservation.assembly.go.kr/reserve/contents/booking/contentsDetail.do?cntsDtlClsCd=EVT301&cntsUniqId=4957022",
+        "govUrl": "https://everywhere.biff.kr/"
+    },
+    "서울디자인위크": {
+        "websiteUrl": "https://www.seoul-designweek.or.kr/",
+        "govUrl": "https://seouldesign.or.kr/"
+    },
+    "그린칩스": {
+        "websiteUrl": "https://www.greenchipsseoul.com/about/2026/",
+        "govUrl": "https://ddp.or.kr"
+    },
+    "M 클래식": {
+        "websiteUrl": "https://www.mfac.or.kr/festival/mpf_info2026.jsp",
+        "govUrl": "https://www.mfac.or.kr"
+    },
+    "M클래식": {
+        "websiteUrl": "https://www.mfac.or.kr/festival/mpf_info2026.jsp",
+        "govUrl": "https://www.mfac.or.kr"
     },
     "D.FESTA": {
         "lat": 37.5815,
@@ -69,6 +108,94 @@ OFFICIAL_PORTAL_REGISTRY = {
         "govUrl": "https://www.busan.go.kr",
         "transitInfo": "부산도시철도 2호선 광안역 3·5번 출구 (도보 10분 광안리해변)"
     },
+    "관악강감찬": {
+        "websiteUrl": "https://www.ggcfest.com/",
+        "govUrl": "https://www.gwanakcf.or.kr/"
+    },
+    "조계사": {
+        "websiteUrl": "https://www.jogyesa.kr/board/notice/board_view.php?search_category=1&num=8268",
+        "govUrl": "https://www.jogyesa.kr"
+    },
+    "드림파크국화": {
+        "websiteUrl": "https://www.slc.or.kr/",
+        "govUrl": "https://www.slc.or.kr"
+    },
+    "자라섬 꽃": {
+        "websiteUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=8b7f0ad9-384b-4b55-ba4b-5a6804cae161",
+        "govUrl": "https://www.gptour.go.kr/"
+    },
+    "용마폭포": {
+        "websiteUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=605",
+        "govUrl": "https://www.jungnang.go.kr"
+    },
+    "문래": {
+        "websiteUrl": "https://www.ydpcf.or.kr/festival/networkart.do",
+        "govUrl": "https://www.ydpcf.or.kr"
+    },
+    "종로 가족공연": {
+        "websiteUrl": "https://www.jfac.or.kr/site/main/program/perf_show_list_view?pgIdx=2792",
+        "govUrl": "https://www.jfac.or.kr"
+    },
+    "운동하는 서울광장": {
+        "websiteUrl": "https://sports.seoul.go.kr/main/SP04080000_user/program_view.do",
+        "govUrl": "https://sports.seoul.go.kr"
+    },
+    "군산 짬뽕": {
+        "websiteUrl": "https://jjambbong.kr/",
+        "govUrl": "https://www.gunsan.go.kr"
+    },
+    "동구동락": {
+        "websiteUrl": "https://dgdr.kr/",
+        "govUrl": "https://www.donggu.go.kr"
+    },
+    "대전 서구 아트": {
+        "websiteUrl": "https://djseogufestival.com/",
+        "govUrl": "https://www.seogu.go.kr"
+    },
+    "생거진천": {
+        "websiteUrl": "https://jcfestival.or.kr/",
+        "govUrl": "https://jinculture.or.kr/"
+    },
+    "전주한지": {
+        "websiteUrl": "https://jjhanji.or.kr/",
+        "govUrl": "https://www.jjcf.or.kr"
+    },
+    "남원 흥부제": {
+        "websiteUrl": "https://heungbu.org/",
+        "govUrl": "https://www.namwon.go.kr"
+    },
+    "심청어린이": {
+        "websiteUrl": "https://www.gokseong.go.kr/tour/festivity/simcheong",
+        "govUrl": "https://www.gokseong.go.kr"
+    },
+    "산청한방약초": {
+        "websiteUrl": "https://www.scherb.or.kr/",
+        "govUrl": "https://donguibogam-village.sancheong.go.kr/"
+    },
+    "고양 가을꽃": {
+        "websiteUrl": "https://flower.or.kr/",
+        "govUrl": "https://www.goyang.go.kr"
+    },
+    "포천 한탄강 가든": {
+        "websiteUrl": "https://www.pocheon-gardenfesta.kr/",
+        "govUrl": "https://www.pocheon.go.kr"
+    },
+    "삼랑성": {
+        "websiteUrl": "https://samrangseong.org/",
+        "govUrl": "https://www.ganghwa.go.kr"
+    },
+    "나주영산강": {
+        "websiteUrl": "https://www.naju.go.kr/tour/notice/information?mode=view&idx=9785&date=2026-10-07",
+        "govUrl": "https://www.naju.go.kr"
+    },
+    "익산 천만송이": {
+        "websiteUrl": "https://www.iksan.go.kr/tour/index.iksan?menuCd=DOM_000002002001000000",
+        "govUrl": "https://www.iksan.go.kr"
+    },
+    "어슬렁페스티벌": {
+        "websiteUrl": "https://www.instagram.com/earthrunfestival/",
+        "govUrl": "https://www.mapo.go.kr"
+    },
     "울산고래축제": {
         "websiteUrl": "http://www.ulsanwhale.com/",
         "govUrl": "https://www.ulsan.go.kr"
@@ -85,47 +212,12 @@ OFFICIAL_PORTAL_REGISTRY = {
         "websiteUrl": "https://www.yeoncheon.go.kr",
         "govUrl": "https://www.yeoncheon.go.kr"
     },
-    "사육신": {
-        "lat": 37.5141,
-        "lng": 126.9486,
-        "address": "서울특별시 동작구 노량진로 191 (노량진동 155-1, 사육신역사공원 내 사육신역사관 및 야외마당)",
-        "websiteUrl": "https://www.idfac.or.kr/sub_new/menu02_02_01.php",
-        "govUrl": "https://www.idfac.or.kr/",
-        "visitKoreaUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159614"
-    },
-    "충효예술": {
-        "lat": 37.5141,
-        "lng": 126.9486,
-        "address": "서울특별시 동작구 노량진로 191 (노량진동 155-1, 사육신역사공원 내 사육신역사관 및 야외마당)",
-        "websiteUrl": "https://www.idfac.or.kr/sub_new/menu02_02_01.php",
-        "govUrl": "https://www.idfac.or.kr/",
-        "visitKoreaUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159614"
-    },
-    "동작 서커스": {
-        "websiteUrl": "https://www.idfac.or.kr/",
-        "govUrl": "https://culture.seoul.go.kr"
-    },
-
     "매헌시민의숲": {
         "lat": 37.4705,
         "lng": 127.0355,
         "address": "서울특별시 서초구 매헌로 99 (양재동 236, 매헌시민의숲 잔디광장 일원)",
         "websiteUrl": "https://www.seoul.go.kr/festa/garden/y2026/maeheon-forest/maeheon-intro/maeheon-overview",
         "govUrl": "https://parks.seoul.go.kr"
-    },
-    "드론 라이트": {
-        "lat": 37.5285,
-        "lng": 127.0680,
-        "address": "서울특별시 광진구 강변북로 139 (자양동 427-1, 뚝섬한강공원 수변무대)",
-        "websiteUrl": "https://www.seouldroneshow.com/",
-        "govUrl": "https://hangang.seoul.go.kr"
-    },
-    "드론라이트": {
-        "lat": 37.5285,
-        "lng": 127.0680,
-        "address": "서울특별시 광진구 강변북로 139 (자양동 427-1, 뚝섬한강공원 수변무대)",
-        "websiteUrl": "https://www.seouldroneshow.com/",
-        "govUrl": "https://hangang.seoul.go.kr"
     },
     "양재천을 품은 야외도서관": {
         "lat": 37.4735,
@@ -135,20 +227,6 @@ OFFICIAL_PORTAL_REGISTRY = {
         "govUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=174dc17e-b58d-46f1-ae12-8fba1d329f4d"
     },
     "양재도서관": {
-        "lat": 37.4735,
-        "lng": 127.0334,
-        "address": "서울특별시 서초구 양재천로 33 (양재동 102-6, 서초구립 양재도서관 및 앞 오솔길)",
-        "websiteUrl": "https://yangjae.seocholib.or.kr/NoticeInfoDetail/26288",
-        "govUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=174dc17e-b58d-46f1-ae12-8fba1d329f4d"
-    },
-    "야외도서관": {
-        "lat": 37.4735,
-        "lng": 127.0334,
-        "address": "서울특별시 서초구 양재천로 33 (양재동 102-6, 서초구립 양재도서관 및 앞 오솔길 야외도서관)",
-        "websiteUrl": "https://yangjae.seocholib.or.kr/NoticeInfoDetail/26288",
-        "govUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=174dc17e-b58d-46f1-ae12-8fba1d329f4d"
-    },
-    "그림책": {
         "lat": 37.4735,
         "lng": 127.0334,
         "address": "서울특별시 서초구 양재천로 33 (양재동 102-6, 서초구립 양재도서관 및 앞 오솔길)",
@@ -189,18 +267,6 @@ OFFICIAL_PORTAL_REGISTRY = {
     "백년나이트": {
         "websiteUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159740&menuNo=200010",
         "govUrl": "https://www.gangbuk.go.kr"
-    },
-    "조계사": {
-        "websiteUrl": "http://www.beopbo.com/news/articleView.html?idxno=338297",
-        "govUrl": "https://www.jogyesa.kr"
-    },
-    "광화문마켓": {
-        "websiteUrl": "https://mediahub.seoul.go.kr/archives/2019647",
-        "govUrl": "https://gwanghwamun.seoul.go.kr"
-    },
-    "그린칩스": {
-        "websiteUrl": "https://mediahub.seoul.go.kr/archives/2019680",
-        "govUrl": "https://ddp.or.kr"
     },
     "잠수교": {
         "lat": 37.5105,
@@ -264,14 +330,6 @@ OFFICIAL_PORTAL_REGISTRY = {
     "대전빵축제": {
         "websiteUrl": "https://dnto.or.kr/",
         "govUrl": "https://www.daejeon.go.kr"
-    },
-    "울산고래축제": {
-        "websiteUrl": "https://www.yna.co.kr/view/AKR20261013125000057",
-        "govUrl": "https://www.ulsan.go.kr"
-    },
-    "드림파크국화": {
-        "websiteUrl": "https://www.incheonnews.com/news/articleView.html?idxno=441478",
-        "govUrl": "https://www.slc.or.kr"
     }
 }
 
