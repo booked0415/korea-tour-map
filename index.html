@@ -2249,7 +2249,7 @@
     // CURRENT LOCAL REFERENCE DATE
     const CURRENT_DATE_STR = "2026-10-13";
     const BOOKMARK_KEY = "korea_travel_bookmarks_v2";
-    const LAST_SYNC_TIMESTAMP = "2026-10-13 22:04:58 KST";
+    const LAST_SYNC_TIMESTAMP = "2026-10-13 22:15:24 KST";
 
     // State
     let itemsData = [];
@@ -3076,12 +3076,12 @@
       // Clean up any stale legacy cached database versions from localStorage
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && k.startsWith('korea_tourism_database_') && k !== 'korea_tourism_database_v141') {
+        if (k && k.startsWith('korea_tourism_database_') && k !== 'korea_tourism_database_v142') {
           localStorage.removeItem(k);
         }
       }
 
-      const stored = localStorage.getItem('korea_tourism_database_v141');
+      const stored = localStorage.getItem('korea_tourism_database_v142');
       if (stored) {
         try { itemsData = JSON.parse(stored); }
         catch(e) { itemsData = [...DEFAULT_DATA]; }
@@ -3093,7 +3093,7 @@
     }
 
     function saveData() {
-      localStorage.setItem('korea_tourism_database_v141', JSON.stringify(itemsData));
+      localStorage.setItem('korea_tourism_database_v142', JSON.stringify(itemsData));
     }
 
     // DOMESTIC BOUNDED MAP (KOREA ONLY)
@@ -5127,11 +5127,11 @@
 
       container.querySelectorAll('.chip').forEach(btn => {
         btn.addEventListener('click', () => {
-          container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-          btn.classList.add('active');
-
           const rVal = btn.dataset.radius;
+
           if (rVal === 'all') {
+            container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
             activeRadiusKm = null;
             if (radiusCircleLayer && map) {
               map.removeLayer(radiusCircleLayer);
@@ -5140,8 +5140,24 @@
             renderMarkers();
             renderCards();
           } else {
-            activeRadiusKm = parseFloat(rVal);
-            applyGpsRadiusFilter(activeRadiusKm);
+            // Toggle off if already active
+            if (btn.classList.contains('active')) {
+              btn.classList.remove('active');
+              const allBtn = container.querySelector('[data-radius="all"]');
+              if (allBtn) allBtn.classList.add('active');
+              activeRadiusKm = null;
+              if (radiusCircleLayer && map) {
+                map.removeLayer(radiusCircleLayer);
+                radiusCircleLayer = null;
+              }
+              renderMarkers();
+              renderCards();
+            } else {
+              container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+              btn.classList.add('active');
+              activeRadiusKm = parseFloat(rVal);
+              applyGpsRadiusFilter(activeRadiusKm);
+            }
           }
         });
       });
@@ -5276,10 +5292,28 @@
       if (!container) return;
       container.querySelectorAll('.chip').forEach(chip => {
         chip.addEventListener('click', () => {
-          container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-          chip.classList.add('active');
           const val = chip.getAttribute('data-timing') || chip.getAttribute('data-province') || chip.getAttribute('data-category') || chip.getAttribute('data-curation') || 'all';
-          callback(val);
+          const allChip = container.querySelector('.chip[data-curation="all"]') || 
+                          container.querySelector('.chip[data-category="all"]') || 
+                          container.querySelector('.chip[data-timing="all"]') || 
+                          container.querySelector('.chip[data-province="all"]');
+
+          if (val === 'all') {
+            container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            callback('all');
+          } else {
+            // Once clicked again, toggle off and revert to 'all'
+            if (chip.classList.contains('active')) {
+              chip.classList.remove('active');
+              if (allChip) allChip.classList.add('active');
+              callback('all');
+            } else {
+              container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+              chip.classList.add('active');
+              callback(val);
+            }
+          }
         });
       });
     }
