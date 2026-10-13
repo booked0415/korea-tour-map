@@ -24,13 +24,41 @@ import urllib.request
 # ==============================================================================
 # 📊 GOOGLE SHEETS LIVE OVERRIDE & REAL-TIME FEED CONFIGURATION
 # ==============================================================================
-DEFAULT_GOOGLE_SHEET_ID = "1_oM-TzsoLpHvKvxlT_YKwKyaygfjFkd_kxpKccr-AhY"
+DEFAULT_GOOGLE_SHEET_ID = "159rBV3xq_W8SjZxx8hz4tKilmv4FWBGmhDnP38MV7P8"
 
 # ==============================================================================
 # 🎯 AUTOMATED VERIFIED OFFICIAL PORTAL & LAND COORDINATES REGISTRY
 # Prevents regression and ensures accurate land access coordinates & deep links
 # ==============================================================================
 OFFICIAL_PORTAL_REGISTRY = {
+    "책읽는 서울광장": {
+        "lat": 37.5663,
+        "lng": 126.9778,
+        "address": "서울특별시 중구 세종대로 110 (태평로1가 31, 서울광장 잔디광장)",
+        "websiteUrl": "https://seouloutdoorlibrary.kr/user/square/about.do",
+        "govUrl": "https://seouloutdoorlibrary.kr/"
+    },
+    "광화문 책마당": {
+        "lat": 37.5714,
+        "lng": 126.9768,
+        "address": "서울특별시 종로구 세종대로 175 (세종로 1-68, 광화문광장 육조마당 및 놀이마당)",
+        "websiteUrl": "https://seouloutdoorlibrary.kr/user/yard/about.do",
+        "govUrl": "https://seouloutdoorlibrary.kr/"
+    },
+    "책읽는 맑은냇가": {
+        "lat": 37.5691,
+        "lng": 126.9785,
+        "address": "서울특별시 종로구 서린동 14-1 (청계광장 및 청계천 모전교~광통교 수변)",
+        "websiteUrl": "https://seouloutdoorlibrary.kr/user/stream/about.do",
+        "govUrl": "https://seouloutdoorlibrary.kr/"
+    },
+    "운동하는 서울광장": {
+        "lat": 37.5658,
+        "lng": 126.9782,
+        "address": "서울특별시 중구 세종대로 110 (태평로1가 31, 서울광장 동측 상설무대 앞)",
+        "websiteUrl": "https://seoulsportsday.com/",
+        "govUrl": "https://sports.seoul.go.kr"
+    },
     "사육신": {
         "lat": 37.5141,
         "lng": 126.9486,
@@ -135,10 +163,6 @@ OFFICIAL_PORTAL_REGISTRY = {
     "종로 가족공연": {
         "websiteUrl": "https://www.jfac.or.kr/site/main/program/perf_show_list_view?pgIdx=2792",
         "govUrl": "https://www.jfac.or.kr"
-    },
-    "운동하는 서울광장": {
-        "websiteUrl": "https://sports.seoul.go.kr/main/SP04080000_user/program_view.do",
-        "govUrl": "https://sports.seoul.go.kr"
     },
     "군산 짬뽕": {
         "websiteUrl": "https://jjambbong.kr/",
@@ -572,6 +596,11 @@ def main():
             print(f"[+] Added new festival from Google Sheet: {raw_name}")
 
     print(f"[*] Google Sheet sync result -> Added: {sheet_added}, Cancelled: {sheet_cancelled}, Updated: {sheet_updated}")
+
+    # 🛡️ GUARANTEE REGISTRY PRECEDENCE: Re-apply auto_calibrate_festival_metadata
+    # This prevents outdated URLs or coordinates from Google Sheet from overwriting verified portals.
+    data = [auto_calibrate_festival_metadata(it) for it in data]
+    print("[🛡️] Re-applied verified OFFICIAL_PORTAL_REGISTRY post-sheet-sync to guarantee 100% data integrity")
 
     # 6. Recalibrate D-days and status for all festivals based on today's KST date
     stats = {"ongoing": 0, "upcoming": 0, "closed": 0, "always": 0}
