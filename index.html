@@ -1728,6 +1728,7 @@
             <button class="chip" data-curation="date">💑 연인과 데이트</button>
             <button class="chip" data-curation="solo">🧘 혼자 힐링·출사</button>
             <button class="chip" data-curation="food">🍴 미식·맛기행</button>
+            <button class="chip" data-curation="pet" style="border-color:#fef08a;">🐶 반려견 동반</button>
           </div>
         </div>
 
@@ -2248,7 +2249,7 @@
     // CURRENT LOCAL REFERENCE DATE
     const CURRENT_DATE_STR = "2026-10-13";
     const BOOKMARK_KEY = "korea_travel_bookmarks_v2";
-    const LAST_SYNC_TIMESTAMP = "2026-10-13 21:47:28 KST";
+    const LAST_SYNC_TIMESTAMP = "2026-10-13 22:04:58 KST";
 
     // State
     let itemsData = [];
@@ -2439,6 +2440,15 @@
       // Free entry badge
       if (item.fee && (item.fee.includes('무료') || item.fee === '무료 입장')) {
         badges.push({ text: '🎟️ 무료 입장', style: 'background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;' });
+      }
+
+      // Pet-friendly badge
+      const petScan = ((item.tags || []).join(" ") + " " + (item.tip || "") + " " + (item.summary || "") + " " + (item.address || "") + " " + (item.name || "")).toLowerCase();
+      const forbiddenPet = petScan.includes('반려견 출입금지') || petScan.includes('애완동물 출입금지') || petScan.includes('동물 출입제한') || petScan.includes('반려동물 입장불가');
+      if (!forbiddenPet) {
+        if (petScan.includes('반려견') || petScan.includes('애견') || petScan.includes('반려동물') || petScan.includes('댕댕이') || petScan.includes('펫') || petScan.includes('야생화단지') || petScan.includes('자라섬') || petScan.includes('하늘공원') || petScan.includes('한강공원') || petScan.includes('호수공원') || petScan.includes('생태공원') || petScan.includes('전곡리유적') || petScan.includes('남수동') || petScan.includes('야외공원')) {
+          badges.push({ text: '🐶 반려견 동반 가능', style: 'background:#fefce8; color:#854d0e; border:1px solid #fef08a;' });
+        }
       }
 
       return badges;
@@ -3066,12 +3076,12 @@
       // Clean up any stale legacy cached database versions from localStorage
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && k.startsWith('korea_tourism_database_') && k !== 'korea_tourism_database_v140') {
+        if (k && k.startsWith('korea_tourism_database_') && k !== 'korea_tourism_database_v141') {
           localStorage.removeItem(k);
         }
       }
 
-      const stored = localStorage.getItem('korea_tourism_database_v140');
+      const stored = localStorage.getItem('korea_tourism_database_v141');
       if (stored) {
         try { itemsData = JSON.parse(stored); }
         catch(e) { itemsData = [...DEFAULT_DATA]; }
@@ -3083,7 +3093,7 @@
     }
 
     function saveData() {
-      localStorage.setItem('korea_tourism_database_v140', JSON.stringify(itemsData));
+      localStorage.setItem('korea_tourism_database_v141', JSON.stringify(itemsData));
     }
 
     // DOMESTIC BOUNDED MAP (KOREA ONLY)
@@ -3392,6 +3402,11 @@
           } else if (activeFilters.curation === 'food') {
             const foodKeywords = ['미식', '먹거리', '맛', '빵', '맥주', '치맥', '대하', '인삼', '한우', '치즈', '시장', '커피', '푸드트럭', '야시장', '바비큐', '요리', '특산', '수산물', '사과', '송이', '떡', '디저트', '음식', '골목'];
             if (!foodKeywords.some(kw => textCorpus.includes(kw))) return false;
+          } else if (activeFilters.curation === 'pet') {
+            const petKeywords = ['반려견', '애견', '반려동물', '댕댕이', '펫', '강아지', '동반가능', '산책', '야외공원', '수변공원', '둘레길', '잔디', '숲길', '하늘공원', '야생화단지', '자라섬', '한강공원', '호수공원', '생태공원', '전곡리유적', '산책로'];
+            const forbiddenKeywords = ['반려견 출입금지', '애완동물 출입금지', '동물 출입제한', '반려동물 입장불가'];
+            if (forbiddenKeywords.some(fkw => textCorpus.includes(fkw))) return false;
+            if (!petKeywords.some(kw => textCorpus.includes(kw))) return false;
           }
         }
 
@@ -3815,7 +3830,7 @@
       if (!el) return;
       let curationNote = '';
       if (activeFilters.curation && activeFilters.curation !== 'all') {
-        const curLabels = { family: '가족·아이', date: '연인·데이트', solo: '힐링·출사', food: '미식·맛기행' };
+        const curLabels = { family: '가족·아이', date: '연인·데이트', solo: '힐링·출사', food: '미식·맛기행', pet: '반려견 동반' };
         curationNote = ` [🎯 ${curLabels[activeFilters.curation] || activeFilters.curation}]`;
       }
       let hideClosedNote = '';
