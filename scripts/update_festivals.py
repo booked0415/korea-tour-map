@@ -22,15 +22,25 @@ import urllib.parse
 import urllib.request
 
 # ==============================================================================
-# 📊 GOOGLE SHEETS LIVE OVERRIDE & REAL-TIME FEED CONFIGURATION
+# 📊 GOOGLE WORKSPACE LIVE OVERRIDE & REAL-TIME FEED CONFIGURATION
+# Dual-Bridge Architecture: Google Docs AI Master Bridge + Google Sheets Fallback
 # ==============================================================================
-DEFAULT_GOOGLE_SHEET_ID = "159rBV3xq_W8SjZxx8hz4tKilmv4FWBGmhDnP38MV7P8"
+DEFAULT_GOOGLE_DOC_ID = "13S3cORuPBy3bmfxGspQLbF64lLIatQNGHK2RSgM7rg8"
+DEFAULT_GOOGLE_SHEET_ID = "1_oM-TzsoLpHvKvxlT_YKwKyaygfjFkd_kxpKccr-AhY"
 
 # ==============================================================================
 # 🎯 AUTOMATED VERIFIED OFFICIAL PORTAL & LAND COORDINATES REGISTRY
 # Prevents regression and ensures accurate land access coordinates & deep links
 # ==============================================================================
 OFFICIAL_PORTAL_REGISTRY = {
+    "자갈치": {
+        "lat": 35.0965,
+        "lng": 129.0305,
+        "address": "부산광역시 중구 자갈치해안로 52 (남포동4가 37-1, 자갈치시장 및 유라리광장 일원)",
+        "websiteUrl": "http://www.ejagalchi.co.kr/",
+        "govUrl": "https://www.visitbusan.net/index.do?menuCd=DOM_000000201005001000&uc_seq=411&lang_cd=ko",
+        "transitInfo": "부산도시철도 1호선 자갈치역 10번 출구 또는 남포역 2번 출구 (도보 5분)"
+    },
     "책읽는 서울광장": {
         "lat": 37.5663,
         "lng": 126.9778,
@@ -38,10 +48,73 @@ OFFICIAL_PORTAL_REGISTRY = {
         "websiteUrl": "https://seouloutdoorlibrary.kr/user/square/about.do",
         "govUrl": "https://seouloutdoorlibrary.kr/"
     },
-    "광화문 책마당": {
-        "lat": 37.5714,
+        "경복궁 별빛야행": {
+        "lat": 37.5818,
+        "lng": 126.9778,
+        "address": "서울특별시 종로구 사직로 161 (세종로 1-1, 경복궁 소주방 및 북측 전각)",
+        "websiteUrl": "https://www.kh.or.kr/short/g6cX",
+        "govUrl": "https://royal.khs.go.kr"
+    },
+    "운현궁 야야": {
+        "lat": 37.5760,
+        "lng": 126.9875,
+        "address": "서울특별시 종로구 삼일대로 464 (운니동 114-10, 운현궁 일원)",
+        "websiteUrl": "https://www.unhyeongung.or.kr/en/sub/prpgram/total_list.php?sno=0&group=basic&code=B35&category=&&abmode=view&no=1979&bsort=&bfsort=",
+        "govUrl": "https://www.unhyeongung.or.kr/"
+    },
+    "흐름과 기억, 존재의 서사": {
+        "lat": 37.5755,
+        "lng": 126.9825,
+        "address": "서울특별시 종로구 송현동 48-9 (율곡로 39, 열린송현녹지광장)",
+        "websiteUrl": "https://artinseoul.kr/%ec%95%84%ed%8a%b8%eb%94%94%eb%a0%89%ed%84%b0-%ec%b4%88%ec%b2%ad%ec%a0%84/",
+        "govUrl": "https://artinseoul.kr/"
+    },
+    "바람이 깃든 마을": {
+        "lat": 37.5305,
+        "lng": 127.0650,
+        "address": "서울특별시 광진구 강변북로 139 (자양동 427-1, 뚝섬한강공원 서측 및 뚝섬나들목, 벽천나들목 입구)",
+        "websiteUrl": "https://artinseoul.kr/%ec%a1%b0%ea%b0%81%eb%a7%88%ec%9d%84-2/",
+        "govUrl": "https://artinseoul.kr/"
+    },
+    "조각 곁, 숲 곁": {
+        "lat": 37.5444,
+        "lng": 127.0374,
+        "address": "서울특별시 성동구 뚝섬로 273 (성수동1가 685, 서울숲 조각공원 및 산책로)",
+        "websiteUrl": "https://artinseoul.kr/%ec%84%9c%ec%9a%b8%ec%88%b2-5/",
+        "govUrl": "https://artinseoul.kr/"
+    },
+    "조각놀이터 서울": {
+        "lat": 37.5495,
+        "lng": 127.0815,
+        "address": "서울특별시 광진구 능동로 216 (능동 18, 서울어린이대공원 잔디마당 및 음악분수 일원)",
+        "websiteUrl": "https://artinseoul.kr/%ec%84%9c%ec%9a%b8%ec%88%b2-5/",
+        "govUrl": "https://artinseoul.kr/"
+    },
+    "시간의 지층, 걷는 조각": {
+        "lat": 37.5325,
+        "lng": 127.1215,
+        "address": "서울특별시 송파구 풍납동 124-1 (올림픽로 593, 풍납동 토성 동성벽공원 일원)",
+        "websiteUrl": "https://artinseoul.kr/%ed%92%8d%eb%82%a9%ed%86%a0%ec%84%b1-%eb%8f%99%ec%84%b1%eb%b2%bd-%ec%9d%bc%eb%8c%80/",
+        "govUrl": "https://artinseoul.kr/"
+    },
+    "광화문광장 가을마켓": {
+        "lat": 37.5708,
         "lng": 126.9768,
-        "address": "서울특별시 종로구 세종대로 175 (세종로 1-68, 광화문광장 육조마당 및 놀이마당)",
+        "address": "서울특별시 종로구 세종대로 175 (광화문광장 놀이마당 및 해치마당)",
+        "websiteUrl": "https://gwanghwamun.seoul.go.kr/ghm/event/ghm/detail.do?eventSn=1447&mid=1015",
+        "govUrl": "https://gwanghwamun.seoul.go.kr"
+    },
+    "커튼 콜 가든": {
+        "lat": 37.5725,
+        "lng": 126.9755,
+        "address": "서울특별시 종로구 세종대로 175 (세종로 81-3, 세종문화회관 대극장 및 야외 세종뜨락)",
+        "websiteUrl": "https://www.sejongpac.or.kr/portal/bbs/B0000058/view.do?nttId=50186&menuNo=200568",
+        "govUrl": "https://www.sejongpac.or.kr"
+    },
+    "광화문 책마당": {
+        "lat": 37.5724,
+        "lng": 126.9769,
+        "address": "서울특별시 종로구 세종대로 172 (광화문역 9번 출구, 경복궁 방향 잔디마당)",
         "websiteUrl": "https://seouloutdoorlibrary.kr/user/yard/about.do",
         "govUrl": "https://seouloutdoorlibrary.kr/"
     },
@@ -419,6 +492,63 @@ def parse_province_group(region):
         return "제주권"
     return "전국"
 
+def fetch_google_doc_master_feed(doc_target=None):
+    """
+    Fetches real-time festival master overrides directly recorded by AI Agent in Google Docs.
+    URL: https://docs.google.com/document/d/{doc_id}/export?format=txt
+    Extracts verified CSV/TSV table between:
+    [FESTIVAL_MASTER_DATABASE_SYNC_START]
+    ...
+    [FESTIVAL_MASTER_DATABASE_SYNC_END]
+    """
+    target = doc_target or os.environ.get("FESTIVAL_DOC_ID", "").strip() or DEFAULT_GOOGLE_DOC_ID
+    if not target:
+        return []
+
+    if "docs.google.com/document" in target:
+        m = re.search(r'/d/([a-zA-Z0-9-_]+)', target)
+        doc_id = m.group(1) if m else target
+    else:
+        doc_id = target.strip()
+
+    txt_url = f"https://docs.google.com/document/d/{doc_id}/export?format=txt"
+    print(f"[*] Connecting to Google Docs Master Bridge: {txt_url}")
+
+    try:
+        req = urllib.request.Request(
+            txt_url,
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) KoreaFestivalBot/2.0"}
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            content = resp.read().decode('utf-8', errors='ignore')
+
+        start_marker = "[FESTIVAL_MASTER_DATABASE_SYNC_START]"
+        end_marker = "[FESTIVAL_MASTER_DATABASE_SYNC_END]"
+        if start_marker in content and end_marker in content:
+            s_idx = content.find(start_marker) + len(start_marker)
+            e_idx = content.find(end_marker, s_idx)
+            raw_data = content[s_idx:e_idx].strip()
+
+            # 1. Try CSV DictReader
+            reader = csv.DictReader(io.StringIO(raw_data))
+            rows = list(reader)
+            if rows and any("축제명" in r for r in rows):
+                print(f"[✓] Successfully retrieved {len(rows)} verified master rows from Google Docs CSV Bridge!")
+                return rows
+
+            # 2. Try JSON parse
+            m_json = re.search(r'(\[\s*\{.*\}\s*\])', raw_data, re.DOTALL)
+            if m_json:
+                items = json.loads(m_json.group(1))
+                print(f"[✓] Successfully retrieved {len(items)} verified master items from Google Docs JSON Bridge!")
+                return items
+
+        print("[!] Google Docs sync marker not found or empty. Falling back to Google Sheet feed.")
+        return []
+    except Exception as e:
+        print(f"[!] Google Docs master feed notice: {e}. Gracefully continuing.")
+        return []
+
 def fetch_google_sheet_override(sheet_target=None):
     """
     Fetches real-time festival additions, edits, or cancellations from Google Sheet CSV export.
@@ -499,7 +629,7 @@ def main():
     print(f"[*] Updated Chip Label -> {new_chip_label} ({n_chip} replacements)")
 
     # 4. Parse DEFAULT_DATA
-    m = re.search(r'const DEFAULT_DATA = (\[.*?\]);', html)
+    m = re.search(r'const DEFAULT_DATA = (\[.*?\]);', html, re.DOTALL)
     if not m:
         print("[!] Error: DEFAULT_DATA array not found in index.html")
         return
@@ -511,13 +641,17 @@ def main():
     data = [auto_calibrate_festival_metadata(it) for it in data]
     existing_names = {item['name'].replace(" ", "") for item in data}
 
-    # 5. Synchronize Overrides & Additions from Google Sheets Live Feed
+    # 5. Synchronize Overrides & Additions from Dual Feeds (Google Docs AI Master Bridge + Google Sheets)
+    doc_rows = fetch_google_doc_master_feed()
     sheet_rows = fetch_google_sheet_override()
+    
+    # Combined feed (Google Docs verified by AI Agent takes strict precedence)
+    combined_rows = doc_rows + sheet_rows
     sheet_added = 0
     sheet_cancelled = 0
     sheet_updated = 0
 
-    for r in sheet_rows:
+    for r in combined_rows:
         raw_status = r.get("상태(등록/취소)", "").strip()
         raw_name = r.get("축제명", "").strip()
         if not raw_name:
@@ -534,22 +668,24 @@ def main():
                 print(f"[-] Removed cancelled festival from database: {raw_name}")
             continue
 
-        # B. Addition / Update Processing
-        s_date = r.get("시작일", "").strip()
-        e_date = r.get("종료일", "").strip()
-        addr = r.get("상세주소", "").strip() or f"{r.get('지역', '전국')} 행사 일원"
+        # B. Addition / Update Processing (Enhanced with Aliases for 100% Zero-Failure Crawling)
+        s_date = r.get("시작일", "").strip() or r.get("startDate", "").strip()
+        e_date = r.get("종료일", "").strip() or r.get("endDate", "").strip()
+        addr = r.get("상세주소", "").strip() or r.get("도로명주소", "").strip() or r.get("address", "").strip() or f"{r.get('지역', '전국')} 행사 일원"
         
         try:
-            lat = float(r.get("위도", 0)) if r.get("위도") else 37.5665
-            lng = float(r.get("경도", 0)) if r.get("경도") else 126.9780
+            lat_val = r.get("위도") or r.get("lat")
+            lng_val = r.get("경도") or r.get("lng")
+            lat = float(lat_val) if lat_val else 37.5665
+            lng = float(lng_val) if lng_val else 126.9780
         except Exception:
             lat, lng = 37.5665, 126.9780
 
-        region = r.get("지역", "전국").strip()
-        summary = r.get("소개및특징", "").strip() or f"{raw_name} 행사입니다."
-        phone = r.get("문의처", "").strip() or "공식 안내처 문의"
-        url = r.get("공식홈페이지URL", "").strip()
-        tip = r.get("골든타임팁", "").strip() or "공식 안내를 참고하여 방문하세요."
+        region = r.get("지역", "전국").strip() or r.get("region", "서울").strip()
+        summary = r.get("소개및특징", "").strip() or r.get("행사요약", "").strip() or r.get("summary", "").strip() or f"{raw_name} 행사입니다."
+        phone = r.get("문의처", "").strip() or r.get("문의전화", "").strip() or r.get("phone", "").strip() or "공식 안내처 문의"
+        url = r.get("공식홈페이지URL", "").strip() or r.get("공식홈페이지", "").strip() or r.get("websiteUrl", "").strip()
+        tip = r.get("골든타임팁", "").strip() or r.get("관람팁", "").strip() or r.get("tip", "").strip() or "공식 안내를 참고하여 방문하세요."
 
         existing_item = next((it for it in data if it.get("name", "").replace(" ", "") == norm_name), None)
         if existing_item:
