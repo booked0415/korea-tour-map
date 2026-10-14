@@ -2249,7 +2249,7 @@
     // CURRENT LOCAL REFERENCE DATE
     const CURRENT_DATE_STR = "2026-10-14";
     const BOOKMARK_KEY = "korea_travel_bookmarks_v2";
-    const LAST_SYNC_TIMESTAMP = "2026-10-14 09:46:04 KST";
+    const LAST_SYNC_TIMESTAMP = "2026-10-14 16:22:57 KST";
 
     // State
     let itemsData = [];
@@ -3093,12 +3093,12 @@
       // Clean up any stale legacy cached database versions from localStorage
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && k.startsWith('korea_tourism_database_') && k !== 'korea_tourism_database_v152') {
+        if (k && k.startsWith('korea_tourism_database_') && k !== 'korea_tourism_database_v153') {
           localStorage.removeItem(k);
         }
       }
 
-      const stored = localStorage.getItem('korea_tourism_database_v152');
+      const stored = localStorage.getItem('korea_tourism_database_v153');
       if (stored) {
         try { itemsData = JSON.parse(stored); }
         catch(e) { itemsData = [...DEFAULT_DATA]; }
@@ -3110,7 +3110,7 @@
     }
 
     function saveData() {
-      localStorage.setItem('korea_tourism_database_v152', JSON.stringify(itemsData));
+      localStorage.setItem('korea_tourism_database_v153', JSON.stringify(itemsData));
     }
 
     // DOMESTIC BOUNDED MAP (KOREA ONLY)
