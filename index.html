@@ -1691,7 +1691,7 @@
         </div>
 
         <div>
-          <div class="chip-group-label">행사 일정 빠른 선택 (2026.10.15 기준)</div>
+          <div class="chip-group-label">행사 일정 빠른 선택 (2026.10.16 기준)</div>
           <div class="chip-scroll" id="timingFilter">
             <button class="chip" data-timing="all">전체 일정</button>
             <button class="chip active" data-timing="ongoing" style="border-color:#fca5a5;">🔴 오늘 진행중 (LIVE)</button>
@@ -2247,9 +2247,9 @@
 
 
     // CURRENT LOCAL REFERENCE DATE
-    const CURRENT_DATE_STR = "2026-10-15";
+    const CURRENT_DATE_STR = "2026-10-16";
     const BOOKMARK_KEY = "korea_travel_bookmarks_v2";
-    const LAST_SYNC_TIMESTAMP = "2026-10-15 21:58:42 KST";
+    const LAST_SYNC_TIMESTAMP = "2026-10-16 08:59:01 KST";
 
     // State
     let itemsData = [];
@@ -3093,12 +3093,12 @@
       // Clean up any stale legacy cached database versions from localStorage
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && k.startsWith('korea_tourism_database_') && k !== 'korea_tourism_database_v158') {
+        if (k && k.startsWith('korea_tourism_database_') && k !== 'korea_tourism_database_v159') {
           localStorage.removeItem(k);
         }
       }
 
-      const stored = localStorage.getItem('korea_tourism_database_v158');
+      const stored = localStorage.getItem('korea_tourism_database_v159');
       if (stored) {
         try { itemsData = JSON.parse(stored); }
         catch(e) { itemsData = [...DEFAULT_DATA]; }
@@ -3110,7 +3110,7 @@
     }
 
     function saveData() {
-      localStorage.setItem('korea_tourism_database_v158', JSON.stringify(itemsData));
+      localStorage.setItem('korea_tourism_database_v159', JSON.stringify(itemsData));
     }
 
     // DOMESTIC BOUNDED MAP (KOREA ONLY)
