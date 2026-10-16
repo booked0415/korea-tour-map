@@ -33,6 +33,97 @@ DEFAULT_GOOGLE_SHEET_ID = "1_oM-TzsoLpHvKvxlT_YKwKyaygfjFkd_kxpKccr-AhY"
 # Prevents regression and ensures accurate land access coordinates & deep links
 # ==============================================================================
 OFFICIAL_PORTAL_REGISTRY = {
+    "서울 바비큐": {
+        "lat": 37.5702,
+        "lng": 126.8725,
+        "address": "서울특별시 마포구 한강난지로 28 (상암동 495-81, 난지캠핑장 일원)",
+        "websiteUrl": "https://www.seoulbbqfesta.com/",
+        "govUrl": "https://news.seoul.go.kr/culture/archives/534476"
+    },
+    "와우북페스티벌": {
+        "lat": 37.5558,
+        "lng": 126.9268,
+        "address": "서울특별시 마포구 와우산로35길 50-4 (동교동 190-1, 경의선책거리 및 홍대 일원)",
+        "websiteUrl": "http://www.wowbookfest.com/",
+        "govUrl": "https://www.mapo.go.kr"
+    },
+    "한복문화주간": {
+        "lat": 37.5238,
+        "lng": 126.9805,
+        "address": "서울특별시 용산구 서빙고로 137 (용산동6가 168-6, 국립중앙박물관 열린마당 및 종로 일원)",
+        "websiteUrl": "https://www.kcdf.or.kr/hanbokcultureweek",
+        "govUrl": "https://www.mcst.go.kr"
+    },
+    "조선왕릉축전": {
+        "lat": 37.6195,
+        "lng": 127.1305,
+        "address": "경기도 구리시 동구릉로 197 (인창동 66, 구리 동구릉 및 서울 정릉·태강릉·화성 융건릉 일원)",
+        "websiteUrl": "https://www.kh.or.kr/fest/rt",
+        "govUrl": "https://royal.khs.go.kr"
+    },
+    "양재 플라워": {
+        "lat": 37.4705,
+        "lng": 127.0355,
+        "address": "서울특별시 서초구 매헌로 99 (양재동 236, 매헌시민의숲 숲속무대 및 aT센터 화훼공판장)",
+        "websiteUrl": "http://flowerfesta.co.kr/",
+        "govUrl": "https://www.seoul.go.kr/festa/garden/y2026/maeheon-forest/maeheon-pculture-program/maeheon-associated-program?article=47720"
+    },
+    "서울미식주간": {
+        "lat": 37.5668,
+        "lng": 127.0095,
+        "address": "서울특별시 중구 을지로 281 (을지로7가 2-1, 동대문디자인플라자 DDP 어울림광장 및 서울 전역)",
+        "websiteUrl": "https://tasteofseoul.visitseoul.net/",
+        "govUrl": "https://www.seoul.go.kr"
+    },
+    "서울 러너스": {
+        "lat": 37.5262,
+        "lng": 126.9238,
+        "address": "서울특별시 영등포구 여의공원로 68 (여의도동 2, 여의도공원 문화의마당)",
+        "websiteUrl": "https://culture.seoul.go.kr/culture/culture/cultureEvent/view.do?cultcode=159656&menuNo=200010",
+        "govUrl": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=682"
+    },
+    "대전콘텐츠페어": {
+        "lat": 36.3745,
+        "lng": 127.3915,
+        "address": "대전광역시 유성구 엑스포로 107 (도룡동 4-19, 대전컨벤션센터 DCC 제2전시장)",
+        "websiteUrl": "https://daejeontour.co.kr/festival_djt",
+        "govUrl": "https://k-character.co.kr/"
+    },
+    "의정부지": {
+        "lat": 37.5745,
+        "lng": 126.9765,
+        "address": "서울특별시 종로구 세종대로 189 (세종로 76-14, 의정부지 역사유적광장 야외무대)",
+        "websiteUrl": "https://event-us.kr/ejbj2025/event/123238",
+        "govUrl": "https://culture.seoul.go.kr"
+    },
+    "금천하모니": {
+        "lat": 37.4568,
+        "lng": 126.8955,
+        "address": "서울특별시 금천구 시흥대로73길 70 (시흥동 1020, 금천구청 광장 및 안양천 다목적광장)",
+        "websiteUrl": "https://gcfac.or.kr/",
+        "govUrl": "https://www.geumcheon.go.kr"
+    },
+    "춤추는광진": {
+        "lat": 37.5482,
+        "lng": 127.0805,
+        "address": "서울특별시 광진구 능동로 216 (능동 18, 서울어린이대공원 열린무대)",
+        "websiteUrl": "https://naruart.or.kr/exhibition/program_view.php?idx=10459&page=1&sch_tab=date&sch_year=2026",
+        "govUrl": "https://www.naruart.or.kr/"
+    },
+    "서울청소년": {
+        "lat": 37.5255,
+        "lng": 126.9245,
+        "address": "서울특별시 영등포구 여의공원로 68 (여의도동 2, 여의도공원 문화의마당)",
+        "websiteUrl": "https://www.youthnavi.net/",
+        "govUrl": "https://www.seoul.go.kr"
+    },
+    "서울조각페스티벌": {
+        "lat": 37.5755,
+        "lng": 126.9825,
+        "address": "서울특별시 종로구 송현동 48-9 (율곡로 39, 열린송현 녹지광장)",
+        "websiteUrl": "https://artinseoul.kr/",
+        "govUrl": "https://artinseoul.kr/"
+    },
     "자갈치": {
         "lat": 35.0965,
         "lng": 129.0305,
@@ -651,6 +742,13 @@ def main():
     sheet_cancelled = 0
     sheet_updated = 0
 
+    
+    OBSOLETE_NAMES_BLACKLIST = {
+        "[서울야외도서관] 2026 서울야외도서관 (책읽는 서울광장)".replace(" ", ""),
+        "[서울도서관] 2026년 책읽는 맑은밤 야외도서관".replace(" ", ""),
+        "2026 세종문화회관 가을 예술 페스티벌".replace(" ", "")
+    }
+
     for r in combined_rows:
         raw_status = r.get("상태(등록/취소)", "").strip()
         raw_name = r.get("축제명", "").strip()
@@ -658,6 +756,10 @@ def main():
             continue
 
         norm_name = raw_name.replace(" ", "")
+        if norm_name in OBSOLETE_NAMES_BLACKLIST:
+            # Silently drop obsolete duplicate names
+            data = [it for it in data if it.get("name", "").replace(" ", "") != norm_name]
+            continue
 
         # A. Cancellation Processing
         if "취소" in raw_status:

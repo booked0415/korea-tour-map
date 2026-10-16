@@ -24,8 +24,7 @@
 
    * 보정 완료: [운현궁 공식 프로그램 상세 안내 페이지](https://www.google.com/search?q=https%3A%2F%2Fwww.unhyeongung.or.kr%2Fen%2Fsub%2Fprpgram%2Ftotal_list.php%3Fsno%3D0%26group%3Dbasic%26code%3DB35%26category%3D%26%26abmode%3Dview%26no%3D1979%26bsort%3D%26bfsort%3D) 및 [운현궁 공식 포털](https://www.google.com/search?q=https%3A%2F%2Fwww.unhyeongung.or.kr%2F) 정밀 매핑 완료
 
-3. **\[서울시청\] 제3회 서울조각페스티벌 5대 거점 분리 (독립 항목 5건 신설)**:
-   단일 행사로 묶여 있던 조각페스티벌을 각 거점별 전용 공식 URL과 개별 실측 좌표로 분리하여 지도상 5개 핀으로 독립 안착:
+3. **\[서울시청\] 제3회 서울조각페스티벌 5대 거점 분리 (독립 항목 5건 신설)**: 단일 행사로 묶여 있던 조각페스티벌을 각 거점별 전용 공식 URL과 개별 실측 좌표로 분리하여 지도상 5개 핀으로 독립 안착:
 
    * 《흐름과 기억, 존재의 서사》 열린송현 녹지광장: [열린송현 전용 안내](https://www.google.com/search?q=https%3A%2F%2Fartinseoul.kr%2F%25ec%2595%2584%25ed%258a%25b8%25eb%2594%2594%25eb%25a0%2589%25ed%2584%25b0-%25ec%25b4%2588%25ec%25b2%25ad%25ec%25a0%2584%2F) | `37.5755, 126.9825` (종로구 송현동 48-9, 율곡로 39)
 
